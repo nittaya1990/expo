@@ -188,6 +188,14 @@ extension AnyModule {
   public func onAppEntersBackground(_ closure: @escaping () -> Void) -> AnyDefinition {
     return EventListener(.appEntersBackground, closure)
   }
+
+  public func objects(_ types: [AnyHostObject.Type]) -> AnyDefinition {
+    return ObjectsDefinition(types: types)
+  }
+}
+
+public struct ObjectsDefinition: AnyDefinition {
+  let types: [AnyHostObject.Type]
 }
 
 /**
