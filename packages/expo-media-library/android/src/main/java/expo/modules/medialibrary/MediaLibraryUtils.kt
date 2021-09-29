@@ -74,23 +74,23 @@ object MediaLibraryUtils {
     }
   }
 
-  fun deleteAssets(context: Context, selection: String?, selectionArgs: Array<String?>?, promise: Promise) {
+  fun deleteAssets(context: Context, selection: String?, selectionArgs: Array<out String?>?, promise: Promise) {
     val projection = arrayOf(MediaStore.MediaColumns._ID, MediaStore.MediaColumns.DATA)
     try {
       context.contentResolver.query(
-        MediaLibraryConstants.EXTERNAL_CONTENT,
+        EXTERNAL_CONTENT_URI,
         projection,
         selection,
         selectionArgs,
         null
       ).use { filesToDelete ->
         if (filesToDelete == null) {
-          promise.reject(MediaLibraryConstants.ERROR_UNABLE_TO_LOAD, "Could not delete assets. Cursor is null.")
+          promise.reject(ERROR_UNABLE_TO_LOAD, "Could not delete assets. Cursor is null.")
         } else {
           while (filesToDelete.moveToNext()) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
               val id = filesToDelete.getLong(filesToDelete.getColumnIndex(MediaStore.MediaColumns._ID))
-              val assetUri = ContentUris.withAppendedId(MediaLibraryConstants.EXTERNAL_CONTENT, id)
+              val assetUri = ContentUris.withAppendedId(EXTERNAL_CONTENT_URI, id)
               context.contentResolver.delete(assetUri, null)
             } else {
               val dataColumnIndex = filesToDelete.getColumnIndex(MediaStore.MediaColumns.DATA)
@@ -98,11 +98,11 @@ object MediaLibraryUtils {
               val file = File(filePath)
               if (file.delete()) {
                 context.contentResolver.delete(
-                  MediaLibraryConstants.EXTERNAL_CONTENT,
+                  EXTERNAL_CONTENT_URI,
                   "${MediaStore.MediaColumns.DATA}=?", arrayOf(filePath)
                 )
               } else {
-                promise.reject(MediaLibraryConstants.ERROR_UNABLE_TO_DELETE, "Could not delete file.")
+                promise.reject(ERROR_UNABLE_TO_DELETE, "Could not delete file.")
                 return
               }
             }
@@ -112,12 +112,12 @@ object MediaLibraryUtils {
       }
     } catch (e: SecurityException) {
       promise.reject(
-        MediaLibraryConstants.ERROR_UNABLE_TO_SAVE_PERMISSION,
+        ERROR_UNABLE_TO_SAVE_PERMISSION,
         "Could not delete asset: need WRITE_EXTERNAL_STORAGE permission.", e
       )
     } catch (e: Exception) {
       e.printStackTrace()
-      promise.reject(MediaLibraryConstants.ERROR_UNABLE_TO_DELETE, "Could not delete file.", e)
+      promise.reject(ERROR_UNABLE_TO_DELETE, "Could not delete file.", e)
     }
   }
 
@@ -143,20 +143,25 @@ object MediaLibraryUtils {
       }
     }
 
-    val path = arrayOf(MediaStore.MediaColumns._ID, MediaStore.MediaColumns.DATA, MediaStore.MediaColumns.BUCKET_ID, MediaStore.MediaColumns.MIME_TYPE)
+    val path = arrayOf(
+      MediaStore.MediaColumns._ID,
+      MediaStore.MediaColumns.DATA,
+      MediaStore.MediaColumns.BUCKET_ID,
+      MediaStore.MediaColumns.MIME_TYPE
+    )
     val selection = MediaStore.Images.Media._ID + " IN ( " + queryPlaceholdersFor(assetsId) + " )"
     context.contentResolver.query(
-      MediaLibraryConstants.EXTERNAL_CONTENT,
+      EXTERNAL_CONTENT_URI,
       path,
       selection,
       assetsId,
       null
     ).use { assets ->
       if (assets == null) {
-        maybePromise.reject(MediaLibraryConstants.ERROR_UNABLE_TO_LOAD, "Could not get assets. Query returns null.")
+        maybePromise.reject(ERROR_UNABLE_TO_LOAD, "Could not get assets. Query returns null.")
         return null
       } else if (assets.count != assetsId.size) {
-        maybePromise.reject(MediaLibraryConstants.ERROR_NO_ASSET, "Could not get all of the requested assets")
+        maybePromise.reject(ERROR_NO_ASSET, "Could not get all of the requested assets")
         return null
       }
       val assetFiles: MutableList<AssetFile> = ArrayList()
@@ -168,7 +173,7 @@ object MediaLibraryUtils {
           assets.getString(assets.getColumnIndex(MediaStore.MediaColumns.MIME_TYPE))
         )
         if (!asset.exists() || !asset.isFile) {
-          maybePromise.reject(MediaLibraryConstants.ERROR_UNABLE_TO_LOAD, "Path $assetPath does not exist or isn't file.")
+          maybePromise.reject(ERROR_UNABLE_TO_LOAD, "Path $assetPath does not exist or isn't file.")
           return null
         }
         assetFiles.add(asset)
@@ -193,7 +198,7 @@ object MediaLibraryUtils {
     val selectionArgs: Array<String>? = null
     val projection = arrayOf(MediaStore.MediaColumns._ID, MediaStore.MediaColumns.MIME_TYPE)
     context.contentResolver.query(
-      MediaLibraryConstants.EXTERNAL_CONTENT,
+      EXTERNAL_CONTENT_URI,
       projection,
       selection,
       selectionArgs,
@@ -219,7 +224,7 @@ object MediaLibraryUtils {
       mimeType.contains("video") -> MediaStore.Video.Media.EXTERNAL_CONTENT_URI
       mimeType.contains("audio") -> MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
       // For backward compatibility
-      else -> MediaLibraryConstants.EXTERNAL_CONTENT
+      else -> EXTERNAL_CONTENT_URI
     }
   }
 
