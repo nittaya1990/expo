@@ -8,7 +8,19 @@
 
 ### 🐛 Bug fixes
 
+- Fix segfault in iOS draw loop. ([#15653](https://github.com/expo/expo/pull/15653) by [@wkozyra95](https://github.com/wkozyra95))
+
 ### 💡 Others
+
+## 11.1.1 — 2021-12-08
+
+_This version does not introduce any user-facing changes._
+
+## 11.1.0 — 2021-12-03
+
+### 🎉 New features
+
+- Add support for reanimated worklets. ([#15296](https://github.com/expo/expo/pull/15296) by [@wkozyra95](https://github.com/wkozyra95))
 
 ## 11.0.1 — 2021-10-01
 

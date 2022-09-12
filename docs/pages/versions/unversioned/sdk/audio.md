@@ -1,9 +1,10 @@
 ---
 title: Audio
 sourceCodeUrl: 'https://github.com/expo/expo/tree/master/packages/expo-av'
+packageName: 'expo-av'
 ---
 
-import InstallSection from '~/components/plugins/InstallSection';
+import {APIInstallSection} from '~/components/plugins/InstallSection';
 import PlatformsSection from '~/components/plugins/PlatformsSection';
 import SnackInline from '~/components/plugins/SnackInline';
 
@@ -13,11 +14,11 @@ Note that audio automatically stops if headphones / bluetooth audio devices are 
 
 Try the [playlist example app](https://expo.dev/@documentation/playlist-example) (source code is [on GitHub](https://github.com/expo/playlist-example)) to see an example usage of the media playback API, and the [recording example app](https://expo.dev/@documentation/record) (source code is [on GitHub](https://github.com/expo/audio-recording-example)) to see an example usage of the recording API.
 
-<PlatformsSection android emulator ios simulator web={{ pending: 'https://github.com/expo/expo/issues/8721' }} />
+<PlatformsSection android emulator ios simulator web />
 
 ## Installation
 
-<InstallSection packageName="expo-av" />
+<APIInstallSection />
 
 ## Usage
 
@@ -194,7 +195,7 @@ We provide this API to customize the audio experience on iOS and Android.
 
   - `playsInSilentModeIOS` : a boolean selecting if your experience's audio should play in silent mode on iOS. This value defaults to `false`.
   - `allowsRecordingIOS` : a boolean selecting if recording is enabled on iOS. This value defaults to `false`. NOTE: when this flag is set to `true`, playback may be routed to the phone receiver instead of to the speaker.
-  - `staysActiveInBackground` : a boolean selecting if the audio session (playback or recording) should stay active even when the app goes into background. This value defaults to `false`. **This is not available in Expo Go for iOS, it will only work in standalone apps**. To enable it for standalone apps, [follow the instructions below](#playing-or-recording-audio-in-background-ios) to add `UIBackgroundMode` to your app configuration.
+  - `staysActiveInBackground` : a boolean selecting if the audio session (playback or recording) should stay active even when the app goes into background. This value defaults to `false`. **This is not available in Expo Go for iOS, it will only work in standalone apps**. To enable it for standalone apps, [follow the instructions below](#playing-or-recording-audio-in-background-ios) to add `UIBackgroundModes` to your app configuration.
   - `interruptionModeIOS` : an enum selecting how your experience's audio should interact with the audio from other apps on iOS:
     - `INTERRUPTION_MODE_IOS_MIX_WITH_OTHERS` : This is the default option. If this option is set, your experience's audio is mixed with audio playing in background apps.
     - `INTERRUPTION_MODE_IOS_DO_NOT_MIX` : If this option is set, your experience's audio interrupts audio from other apps.
@@ -226,9 +227,9 @@ A `Promise` that will reject if the audio mode could not be enabled for the devi
 
 #### Playing or recording audio in background (iOS)
 
-On iOS, audio playback and recording in background is only available in standalone apps, and it requires some extra configuration. On iOS, each background feature requires a special key in `UIBackgroundModes` array in your `Info.plist` file. In standalone apps this array is empty by default, so in order to use background features you will need to add appropriate keys to your `app.json` configuration.
+On iOS, audio playback and recording in background is only available in standalone apps, and it requires some extra configuration. On iOS, each background feature requires a special key in `UIBackgroundModes` array in your **Info.plist** file. In standalone apps this array is empty by default, so in order to use background features you will need to add appropriate keys to your **app.json** configuration.
 
-See an example of `app.json` that enables audio playback in background:
+See an example of **app.json** that enables audio playback in background:
 
 ```json
 {
@@ -320,10 +321,10 @@ A static convenience method to construct and load a sound is also provided:
 
   ```javascript
   try {
-    const {
-      sound: soundObject,
-      status,
-    } = await Audio.Sound.createAsync(require('./assets/sounds/hello.mp3'), { shouldPlay: true });
+    const { sound: soundObject, status } = await Audio.Sound.createAsync(
+      require('./assets/sounds/hello.mp3'),
+      { shouldPlay: true }
+    );
     // Your sound is playing!
   } catch (error) {
     // An error occurred!
@@ -332,8 +333,8 @@ A static convenience method to construct and load a sound is also provided:
 
 On the `soundObject` reference, the following API is provided:
 
-- `soundObject.setOnMetadataUpdate(onMetadataUpdate)` _[iOS only]_ 
-Sets a function to be called whenever the metadata (of type `AVMetadata`, details below) of the sound object, if any, changes.
+- `soundObject.setOnMetadataUpdate(onMetadataUpdate)` _[iOS only]_
+  Sets a function to be called whenever the metadata (of type `AVMetadata`, details below) of the sound object, if any, changes.
 
   #### Parameters
 
@@ -418,7 +419,7 @@ A static convenience method to construct and start a recording is also provided:
   const { recording, status } = await Audio.Recording.createAsync(
     options,
     onRecordingStatusUpdate,
-    progressUpdateIntervalMillis,
+    progressUpdateIntervalMillis
   );
 
   // Which is equivalent to the following:
@@ -447,10 +448,9 @@ A static convenience method to construct and start a recording is also provided:
 
   ```javascript
   try {
-    const {
-      recording: recordingObject,
-      status,
-    } = await Audio.Recording.createAsync(Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY);
+    const { recording: recordingObject, status } = await Audio.Recording.createAsync(
+      Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY
+    );
     // You are now recording!
   } catch (error) {
     // An error occurred!

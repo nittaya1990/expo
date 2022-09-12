@@ -14,6 +14,14 @@ export declare const updateId: string | null;
  */
 export declare const releaseChannel: string;
 /**
+ * The channel name of the current build, if configured for use with EAS Update. Null otherwise.
+ */
+export declare const channel: string | null;
+/**
+ * The runtime version of the current build.
+ */
+export declare const runtimeVersion: string | null;
+/**
  * @hidden
  */
 export declare const localAssets: LocalAssets;
@@ -101,3 +109,4 @@ export declare function clearUpdateCacheExperimentalAsync(_sdkVersion?: string):
  * listener.
  */
 export declare function addListener(listener: (event: UpdateEvent) => void): EventSubscription;
+//# sourceMappingURL=Updates.d.ts.map

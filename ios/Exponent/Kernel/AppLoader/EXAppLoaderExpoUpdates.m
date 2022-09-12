@@ -17,6 +17,7 @@
 #import <EXUpdates/EXUpdatesAppLoaderTask.h>
 #import <EXUpdates/EXUpdatesConfig.h>
 #import <EXUpdates/EXUpdatesDatabase.h>
+#import <EXUpdates/EXUpdatesErrorRecovery.h>
 #import <EXUpdates/EXUpdatesFileDownloader.h>
 #import <EXUpdates/EXUpdatesLauncherSelectionPolicyFilterAware.h>
 #import <EXUpdates/EXUpdatesLoaderSelectionPolicyFilterAware.h>
@@ -344,16 +345,16 @@ NS_ASSUME_NONNULL_BEGIN
   }
 
   _config = [EXUpdatesConfig configWithDictionary:@{
-    @"EXUpdatesURL": httpManifestUrl.absoluteString,
-    @"EXUpdatesSDKVersion": [self _sdkVersions],
-    @"EXUpdatesScopeKey": httpManifestUrl.absoluteString,
-    @"EXUpdatesReleaseChannel": releaseChannel,
-    @"EXUpdatesHasEmbeddedUpdate": @([EXEnvironment sharedEnvironment].isDetached),
-    @"EXUpdatesEnabled": @([EXEnvironment sharedEnvironment].areRemoteUpdatesEnabled),
-    @"EXUpdatesLaunchWaitMs": launchWaitMs,
-    @"EXUpdatesCheckOnLaunch": shouldCheckOnLaunch ? @"ALWAYS" : @"NEVER",
-    @"EXUpdatesExpectsSignedManifest": @YES,
-    @"EXUpdatesRequestHeaders": [self _requestHeaders]
+    EXUpdatesConfigUpdateUrlKey: httpManifestUrl.absoluteString,
+    EXUpdatesConfigSDKVersionKey: [self _sdkVersions],
+    EXUpdatesConfigScopeKeyKey: httpManifestUrl.absoluteString,
+    EXUpdatesConfigReleaseChannelKey: releaseChannel,
+    EXUpdatesConfigHasEmbeddedUpdateKey: @([EXEnvironment sharedEnvironment].isDetached),
+    EXUpdatesConfigEnabledKey: @([EXEnvironment sharedEnvironment].areRemoteUpdatesEnabled),
+    EXUpdatesConfigLaunchWaitMsKey: launchWaitMs,
+    EXUpdatesConfigCheckOnLaunchKey: shouldCheckOnLaunch ? EXUpdatesConfigCheckOnLaunchValueAlways : EXUpdatesConfigCheckOnLaunchValueNever,
+    EXUpdatesConfigExpectsSignedManifestKey: @YES,
+    EXUpdatesConfigRequestHeadersKey: [self _requestHeaders]
   }];
 
   if (![EXEnvironment sharedEnvironment].areRemoteUpdatesEnabled) {
@@ -391,7 +392,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)_launchWithNoDatabaseAndError:(nullable NSError *)error
 {
   EXUpdatesAppLauncherNoDatabase *appLauncher = [[EXUpdatesAppLauncherNoDatabase alloc] init];
-  [appLauncher launchUpdateWithConfig:_config fatalError:error];
+  [appLauncher launchUpdateWithConfig:_config];
 
   _confirmedManifest = [self _processManifest:appLauncher.launchedUpdate.manifest];
   if (_confirmedManifest == nil) {
@@ -404,6 +405,8 @@ NS_ASSUME_NONNULL_BEGIN
     [self.delegate appLoader:self didLoadOptimisticManifest:_confirmedManifest];
     [self.delegate appLoader:self didFinishLoadingManifest:_confirmedManifest bundle:_bundle];
   }
+
+  [[EXUpdatesErrorRecovery new] writeErrorOrExceptionToLog:error];
 }
 
 - (void)_runReaper
@@ -436,19 +439,6 @@ NS_ASSUME_NONNULL_BEGIN
 
   if (manifest) {
     if (manifest.isDevelopmentSilentLaunch) {
-      _shouldShowRemoteUpdateStatus = NO;
-      return;
-    }
-
-    // we want to avoid showing the status for older snack SDK versions, too
-    // we make our best guess based on the manifest fields
-    // TODO: remove this after SDK 38 is phased out
-    NSString *sdkVersion = manifest.sdkVersion;
-    NSString *bundleUrl = manifest.bundleUrl;
-    if (![@"UNVERSIONED" isEqual:sdkVersion] &&
-        sdkVersion.integerValue < 39 &&
-        [@"snack" isEqual:manifest.slug] &&
-        [bundleUrl hasPrefix:@"https://d1wp6m56sqw74a.cloudfront.net/%40exponent%2Fsnack"]) {
       _shouldShowRemoteUpdateStatus = NO;
       return;
     }

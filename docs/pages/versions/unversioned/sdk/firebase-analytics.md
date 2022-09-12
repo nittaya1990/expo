@@ -1,10 +1,11 @@
 ---
 title: FirebaseAnalytics
 sourceCodeUrl: 'https://github.com/expo/expo/tree/master/packages/expo-firebase-analytics'
+packageName: 'expo-firebase-analytics'
 ---
 
 import APISection from '~/components/plugins/APISection';
-import InstallSection from '~/components/plugins/InstallSection';
+import {APIInstallSection} from '~/components/plugins/InstallSection';
 import PlatformsSection from '~/components/plugins/PlatformsSection';
 
 import { InlineCode } from '~/components/base/code';
@@ -18,7 +19,7 @@ Learn more in the official [Firebase Docs](https://firebase.google.com/docs/anal
 
 ## Installation
 
-<InstallSection packageName="expo-firebase-analytics" />
+<APIInstallSection />
 
 When using the web-platform, you'll also need to run `expo install firebase`, which install the Firebase JS SDK.
 
@@ -33,7 +34,7 @@ The use of Native Firebase Analytics requires that the google-services configura
 
 Instead, Expo Go relies on a JavaScript-based implementation of Firebase Analytics to log events. This means that certain native life-cycle events are not recorded in the standard client, but you can still use `logEvent` to record events.
 
-You may want to use Firebase Analytics in Expo Go to verify that you are logging events at the time you intend to and with the data that you want to attach without having to do a standalone app build. To set this up, ensure that the Firebase web configuration is set in `app.json` and that `measurementId` exists in your firebase config. If `measurementId` doesn't exist, then you need to enable or update Google Analytics in your Firebase project.
+You may want to use Firebase Analytics in Expo Go to verify that you are logging events at the time you intend to and with the data that you want to attach without having to do a standalone app build. To set this up, ensure that the Firebase web configuration is set in **app.json** and that `measurementId` exists in your firebase config. If `measurementId` doesn't exist, then you need to enable or update Google Analytics in your Firebase project.
 
 **app.json**
 

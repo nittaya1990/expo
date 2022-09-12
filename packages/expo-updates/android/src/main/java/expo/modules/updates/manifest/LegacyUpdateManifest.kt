@@ -22,7 +22,7 @@ class LegacyUpdateManifest private constructor(
   private val mId: UUID,
   private val mScopeKey: String,
   private val mCommitTime: Date,
-  private val mRuntimeVersion: String?,
+  private val mRuntimeVersion: String,
   private val mBundleUrl: Uri,
   private val mAssets: JSONArray?
 ) : UpdateManifest {
@@ -86,7 +86,7 @@ class LegacyUpdateManifest private constructor(
   companion object {
     private val TAG = UpdateManifest::class.java.simpleName
 
-    private const val EXPO_ASSETS_URL_BASE = "https://d1wp6m56sqw74a.cloudfront.net/~assets/"
+    private const val EXPO_ASSETS_URL_BASE = "https://classic-assets.eascdn.net/~assets/"
     private val EXPO_DOMAINS = arrayOf("expo.io", "exp.host", "expo.test")
 
     @Throws(JSONException::class)
@@ -116,9 +116,9 @@ class LegacyUpdateManifest private constructor(
       val bundledAssets = manifest.getBundledAssets()
       return LegacyUpdateManifest(
         manifest,
-        configuration.updateUrl,
+        configuration.updateUrl!!,
         id,
-        configuration.scopeKey,
+        configuration.scopeKey!!,
         commitTime,
         runtimeVersion,
         bundleUrl,

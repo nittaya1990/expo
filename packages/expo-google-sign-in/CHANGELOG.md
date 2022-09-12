@@ -8,7 +8,15 @@
 
 ### 🐛 Bug fixes
 
+- Added `@expo/config-plugins` dependency ([#15621](https://github.com/expo/expo/pull/15621) by [@EvanBacon](https://github.com/EvanBacon))
+
 ### 💡 Others
+
+## 10.1.0 — 2021-12-03
+
+### 💡 Others
+
+- Added deprecation notice for module. ([#15295](https://github.com/expo/expo/pull/15295) by [@EvanBacon](https://github.com/EvanBacon))
 
 ## 10.0.1 — 2021-10-01
 

@@ -14,7 +14,7 @@ import ImageSpotlight from '~/components/plugins/ImageSpotlight'
 
 ## Known issues
 
-**iOS only**: BackgroundFetch only works when the app is backgrounded, not if the app was terminated or upon device reboot. [Here is the relevant Github issue](https://github.com/expo/expo/issues/3582)
+**iOS only**: BackgroundFetch only works when the app is backgrounded, not if the app was terminated or upon device reboot. [Here is the relevant GitHub issue](https://github.com/expo/expo/issues/3582)
 
 ## Installation
 
@@ -157,7 +157,7 @@ async function registerBackgroundFetchAsync() {
 
 ## Configuration
 
-In order to use `BackgroundFetch` API in standalone, detached and bare apps on iOS, your app has to include background mode in the `Info.plist` file. See [background tasks configuration guide](task-manager.md#configuration-for-standalone-apps) for more details.
+In order to use `BackgroundFetch` API in standalone, detached and bare apps on iOS, your app has to include background mode in the **Info.plist** file. See [background tasks configuration guide](task-manager.md#configuration-for-standalone-apps) for more details.
 
 On Android, this module might listen when the device is starting up. It's necessary to continue working on tasks started with `startOnBoot`. It also keeps devices "awake" that are going idle and asleep fast, to improve reliability of the tasks. Because of this both the `RECEIVE_BOOT_COMPLETED` and `WAKE_LOCK` permissions are added automatically.
 

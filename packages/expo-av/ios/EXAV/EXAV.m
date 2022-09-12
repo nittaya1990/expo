@@ -8,11 +8,13 @@
 #import <ExpoModulesCore/EXFileSystemInterface.h>
 #import <ExpoModulesCore/EXPermissionsInterface.h>
 #import <ExpoModulesCore/EXPermissionsMethodsDelegate.h>
+#import <ExpoModulesCore/EXJavaScriptContextProvider.h>
 
 #import <EXAV/EXAV.h>
 #import <EXAV/EXAVPlayerData.h>
 #import <EXAV/EXVideoView.h>
 #import <EXAV/EXAudioRecordingPermissionRequester.h>
+#import <EXAV/EXAV+AudioSampleCallback.h>
 
 NSString *const EXAudioRecordingOptionsIsMeteringEnabledKey = @"isMeteringEnabled";
 NSString *const EXAudioRecordingOptionsKeepAudioActiveHintKey = @"keepAudioActiveHint";
@@ -34,6 +36,8 @@ NSString *const EXDidUpdatePlaybackStatusEventName = @"didUpdatePlaybackStatus";
 NSString *const EXDidUpdateMetadataEventName = @"didUpdateMetadata";
 
 @interface EXAV ()
+
+@property (nonatomic, weak) RCTBridge *bridge;
 
 @property (nonatomic, weak) id kernelAudioSessionManagerDelegate;
 @property (nonatomic, weak) id kernelPermissionsServiceDelegate;
@@ -59,7 +63,7 @@ NSString *const EXDidUpdateMetadataEventName = @"didUpdateMetadata";
 @property (nonatomic, assign) BOOL audioRecorderShouldBeginRecording;
 @property (nonatomic, assign) int audioRecorderDurationMillis;
 
-@property (nonatomic, weak) EXModuleRegistry *moduleRegistry;
+@property (nonatomic, weak) EXModuleRegistry *expoModuleRegistry;
 @property (nonatomic, weak) id<EXPermissionsInterface> permissionsManager;
 
 @end
@@ -100,8 +104,22 @@ EX_EXPORT_MODULE(ExponentAV);
   return @[@protocol(EXAVInterface)];
 }
 
+- (void)installJsiBindings
+{
+  id<EXJavaScriptContextProvider> jsContextProvider = [_expoModuleRegistry getModuleImplementingProtocol:@protocol(EXJavaScriptContextProvider)];
+  void *jsRuntimePtr = [jsContextProvider javaScriptRuntimePointer];
+  if (jsRuntimePtr) {
+    [self installJSIBindingsForRuntime:jsRuntimePtr withSoundDictionary:_soundDictionary];
+  } else {
+    EXLogWarn(@"EXAV: Cannot install Audio Sample Buffer callback. Do you have 'Remote Debugging' enabled in your app's Developer Menu (https://docs.expo.dev/workflow/debugging)? Audio Sample Buffer callbacks are not supported while using Remote Debugging, you will need to disable it to use them.");
+  }
+}
+
 - (NSDictionary *)constantsToExport
 {
+  // install JSI bindings here because `constantsToExport` is called when the JS runtime has been created
+  [self installJsiBindings];
+  
   return @{
     @"Qualities": @{
         @"Low": AVAudioTimePitchAlgorithmLowQualityZeroLatency,
@@ -113,16 +131,16 @@ EX_EXPORT_MODULE(ExponentAV);
 
 #pragma mark - Expo experience lifecycle
 
-- (void)setModuleRegistry:(EXModuleRegistry *)moduleRegistry
+- (void)setModuleRegistry:(EXModuleRegistry *)expoModuleRegistry
 {
-  [[_moduleRegistry getModuleImplementingProtocol:@protocol(EXAppLifecycleService)] unregisterAppLifecycleListener:self];
-  _moduleRegistry = moduleRegistry;
-  _kernelAudioSessionManagerDelegate = [_moduleRegistry getSingletonModuleForName:@"AudioSessionManager"];
+  [[_expoModuleRegistry getModuleImplementingProtocol:@protocol(EXAppLifecycleService)] unregisterAppLifecycleListener:self];
+  _expoModuleRegistry = expoModuleRegistry;
+  _kernelAudioSessionManagerDelegate = [_expoModuleRegistry getSingletonModuleForName:@"AudioSessionManager"];
   if (!_isBackgrounded) {
     [_kernelAudioSessionManagerDelegate moduleDidForeground:self];
   }
-  [[_moduleRegistry getModuleImplementingProtocol:@protocol(EXAppLifecycleService)] registerAppLifecycleListener:self];
-  _permissionsManager = [_moduleRegistry getModuleImplementingProtocol:@protocol(EXPermissionsInterface)];
+  [[_expoModuleRegistry getModuleImplementingProtocol:@protocol(EXAppLifecycleService)] registerAppLifecycleListener:self];
+  _permissionsManager = [_expoModuleRegistry getModuleImplementingProtocol:@protocol(EXPermissionsInterface)];
   [EXPermissionsMethodsDelegate registerRequesters:@[[EXAudioRecordingPermissionRequester new]] withPermissionsManager:_permissionsManager];
 }
 
@@ -151,6 +169,41 @@ EX_EXPORT_MODULE(ExponentAV);
       [exAVObject appDidBackgroundStayActive:YES];
     }];
   }
+}
+
+- (void)onAppContentWillReload
+{
+  // We need to clear audio tap before sound gets destroyed to avoid
+  // using pointer to deallocated EXAVPlayerData in MTAudioTap process callback
+  for (NSNumber *key in [_soundDictionary allKeys]) {
+    [self _removeAudioCallbackForKey:key];
+  }
+}
+
+#pragma mark - RCTBridgeModule
+
+- (void)setBridge:(RCTBridge *)bridge
+{
+  _bridge = bridge;
+}
+
+// Required in Expo Go only - EXAV conforms to RCTBridgeModule protocol
+// and in Expo Go, kernel calls [EXReactAppManager rebuildBridge]
+// which requires this to be implemented. Normal "bare" RN modules
+// use RCT_EXPORT_MODULE macro which implement this automatically.
++(NSString *)moduleName
+{
+  return @"ExponentAV";
+}
+
+// Both RCTBridgeModule and EXExportedModule define `constantsToExport`. We implement
+// that method for the latter, but React Bridge displays a yellow LogBox warning:
+// "Module EXAV requires main queue setup since it overrides `constantsToExport` but doesn't implement `requiresMainQueueSetup`."
+// Since we don't care about that (RCTBridgeModule is used here for another reason),
+// we just need this to dismiss that warning.
++ (BOOL)requiresMainQueueSetup
+{
+  return NO;
 }
 
 #pragma mark - RCTEventEmitter
@@ -409,6 +462,14 @@ EX_EXPORT_MODULE(ExponentAV);
   }
 }
 
+- (void)_removeAudioCallbackForKey:(NSNumber *)key
+{
+  EXAVPlayerData *data = _soundDictionary[key];
+  if (data) {
+    [data setSampleBufferCallback:nil];
+  }
+}
+
 #pragma mark - Internal video playback helper method
 
 - (void)_runBlock:(void (^)(EXVideoView *view))block
@@ -417,7 +478,7 @@ withEXVideoViewForTag:(nonnull NSNumber *)reactTag
 {
   // TODO check that the bridge is still valid after the dispatch
   // TODO check if the queues are ok
-  [[_moduleRegistry getModuleImplementingProtocol:@protocol(EXUIManager)] executeUIBlock:^(id view) {
+  [[_expoModuleRegistry getModuleImplementingProtocol:@protocol(EXUIManager)] executeUIBlock:^(id view) {
     if ([view isKindOfClass:[EXVideoView class]]) {
       block(view);
     } else {
@@ -505,7 +566,7 @@ withEXVideoViewForTag:(nonnull NSNumber *)reactTag
     return EXErrorWithMessage(@"Recorder is already prepared.");
   }
   
-  id<EXFileSystemInterface> fileSystem = [_moduleRegistry getModuleImplementingProtocol:@protocol(EXFileSystemInterface)];
+  id<EXFileSystemInterface> fileSystem = [_expoModuleRegistry getModuleImplementingProtocol:@protocol(EXFileSystemInterface)];
   
   if (!fileSystem) {
     return EXErrorWithMessage(@"No FileSystem module.");
@@ -665,7 +726,7 @@ EX_EXPORT_METHOD_AS(loadForSound,
 
 - (void)sendEventWithName:(NSString *)eventName body:(NSDictionary *)body
 {
-  [[_moduleRegistry getModuleImplementingProtocol:@protocol(EXEventEmitterService)] sendEventWithName:eventName body:body];
+  [[_expoModuleRegistry getModuleImplementingProtocol:@protocol(EXEventEmitterService)] sendEventWithName:eventName body:body];
 }
 
 EX_EXPORT_METHOD_AS(unloadForSound,
@@ -923,7 +984,7 @@ EX_EXPORT_METHOD_AS(unloadAudioRecorder,
 - (void)dealloc
 {
   [_kernelAudioSessionManagerDelegate moduleWillDeallocate:self];
-  [[_moduleRegistry getModuleImplementingProtocol:@protocol(EXAppLifecycleService)] unregisterAppLifecycleListener:self];
+  [[_expoModuleRegistry getModuleImplementingProtocol:@protocol(EXAppLifecycleService)] unregisterAppLifecycleListener:self];
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   
   // This will clear all @properties and deactivate the audio session:

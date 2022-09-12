@@ -87,7 +87,7 @@ class InternalHeadlessAppLoader(private val context: Context) :
           }
         }
 
-        override fun onBundleCompleted(localBundlePath: String?) {
+        override fun onBundleCompleted(localBundlePath: String) {
           Exponent.instance.runOnUiThread { setBundle(localBundlePath) }
         }
 
@@ -150,7 +150,7 @@ class InternalHeadlessAppLoader(private val context: Context) :
     }
   }
 
-  fun setBundle(localBundlePath: String?) {
+  private fun setBundle(localBundlePath: String) {
     if (!isDebugModeEnabled) {
       AsyncCondition.wait(
         READY_FOR_BUNDLE,
@@ -284,7 +284,7 @@ class InternalHeadlessAppLoader(private val context: Context) :
     }
 
     val reactInstanceManager = builder.callRecursive("build")
-    val devSupportManager = this.reactInstanceManager!!.callRecursive("getDevSupportManager")
+    val devSupportManager = reactInstanceManager!!.callRecursive("getDevSupportManager")
     if (devSupportManager != null) {
       val devSettings = devSupportManager.callRecursive("getDevSettings")
       devSettings?.setField("exponentActivityId", activityId)

@@ -6,6 +6,60 @@
 
 ### 🎉 New features
 
+- Add unit tests for react app. ([#16005](https://github.com/expo/expo/pull/16005) by [@ajsmth](https://github.com/ajsmth))
+
+### 🐛 Bug fixes
+
+- Fix compatibility with react-native 0.66. ([#15914](https://github.com/expo/expo/pull/15914) by [@kudo](https://github.com/kudo))
+
+### 💡 Others
+
+## 0.9.1 — 2022-01-17
+
+### 🐛 Bug fixes
+
+- Fix: release build won't install on Android 12. ([#15429](https://github.com/expo/expo/pull/15429) by [@zhigang1992](https://github.com/zhigang1992))
+
+## 0.9.0 — 2021-12-22
+
+### 🎉 New features
+
+- Vendor react-native-safe-area-context. ([#15382](https://github.com/expo/expo/pull/15382) by [@ajsmth](https://github.com/ajsmth))
+- Add ability to query development sessions with a device ID. ([#15539](https://github.com/expo/expo/pull/15539) by [@esamelson](https://github.com/esamelson))
+
+### 💡 Others
+
+- Updated `@expo/config-plugins` from `4.0.2` to `4.0.14` ([#15621](https://github.com/expo/expo/pull/15621) by [@EvanBacon](https://github.com/EvanBacon))
+
+## 0.8.6 — 2021-12-03
+
+_This version does not introduce any user-facing changes._
+
+## 0.8.5 — 2021-12-03
+
+### 🐛 Bug fixes
+
+- Fix hermes inspector opening wrong target. ([#14684](https://github.com/expo/expo/pull/14684) by [@kudo](https://github.com/kudo))
+- Fix Gradle error when running Gradle from outside of the project directory. ([#15109](https://github.com/expo/expo/pull/15109) by [@kudo](https://github.com/kudo))
+- Fix `Project is using deprecated .expo.* file extensions`. ([#15070](https://github.com/expo/expo/pull/15070) by [@lukmccall](https://github.com/lukmccall))
+- Fix shake gesture sometimes brings two menus on Android. ([#15406](https://github.com/expo/expo/pull/15406) by [@lukmccall](https://github.com/lukmccall))
+
+## 0.8.4 — 2021-10-21
+
+_This version does not introduce any user-facing changes._
+
+## 0.8.3 — 2021-10-15
+
+### 🐛 Bug fixes
+
+- Fix hermes inspector opening wrong target. ([#14684](https://github.com/expo/expo/pull/14684) by [@kudo](https://github.com/kudo))
+
+## 0.8.2 — 2021-10-07
+
+### 🛠 Breaking changes
+
+- Changed the reload key command to `r` instead of `Cmd + r` on iOS. ([#14590](https://github.com/expo/expo/pull/14590) by [@lukmccall](https://github.com/lukmccall))
+
 ### 🐛 Bug fixes
 
 - Fix building errors from use_frameworks! in Podfile. ([#14523](https://github.com/expo/expo/pull/14523) by [@kudo](https://github.com/kudo))

@@ -13,22 +13,28 @@ import semver from 'semver';
 
 import { InstallationPage } from './constants';
 import { resolveExpoUpdatesVersion } from './resolveExpoUpdatesVersion';
+import { addLines, replaceLine } from './utils';
 import { withDevLauncherAppDelegate } from './withDevLauncherAppDelegate';
 
 const pkg = require('expo-dev-launcher/package.json');
 
 const DEV_LAUNCHER_ANDROID_IMPORT = 'expo.modules.devlauncher.DevLauncherController';
 const DEV_LAUNCHER_UPDATES_ANDROID_IMPORT = 'expo.modules.updates.UpdatesDevLauncherController';
-const DEV_LAUNCHER_ON_NEW_INTENT = `
-  @Override
-  public void onNewIntent(Intent intent) {
-      if (DevLauncherController.tryToHandleIntent(this, intent)) {
-         return;
-      }
-      super.onNewIntent(intent);
-  }
-`;
-const DEV_LAUNCHER_WRAPPED_ACTIVITY_DELEGATE = `DevLauncherController.wrapReactActivityDelegate(this, () -> $1);`;
+const DEV_LAUNCHER_ON_NEW_INTENT = [
+  '',
+  '  @Override',
+  '  public void onNewIntent(Intent intent) {',
+  '    super.onNewIntent(intent);',
+  '  }',
+  '',
+].join('\n');
+const DEV_LAUNCHER_HANDLE_INTENT = [
+  '    if (DevLauncherController.tryToHandleIntent(this, intent)) {',
+  '      return;',
+  '    }',
+].join('\n');
+const DEV_LAUNCHER_WRAPPED_ACTIVITY_DELEGATE = (activityDelegateDeclaration: string) =>
+  `DevLauncherController.wrapReactActivityDelegate(this, () -> ${activityDelegateDeclaration})`;
 const DEV_LAUNCHER_ANDROID_INIT = 'DevLauncherController.initialize(this, getReactNativeHost());';
 const DEV_LAUNCHER_UPDATES_ANDROID_INIT = `if (BuildConfig.DEBUG) {
       DevLauncherController.getInstance().setUpdatesInterface(UpdatesDevLauncherController.initialize(this));
@@ -36,8 +42,8 @@ const DEV_LAUNCHER_UPDATES_ANDROID_INIT = `if (BuildConfig.DEBUG) {
 const DEV_LAUNCHER_UPDATES_DEVELOPER_SUPPORT =
   'return DevLauncherController.getInstance().getUseDeveloperSupport();';
 
-const DEV_LAUNCHER_JS_REGISTER_ERROR_HANDLERS = `import 'expo-dev-client'`;
-const DEV_LAUNCHER_JS_REGISTER_ERROR_HANDLERS_VIA_LAUNCHER = `import 'expo-dev-launcher'`;
+const DEV_LAUNCHER_JS_REGISTER_ERROR_HANDLERS_REGEX =
+  /import ['"](?:expo-dev-client|expo-dev-launcher)['"]/;
 
 async function readFileAsync(path: string): Promise<string> {
   return fs.promises.readFile(path, 'utf8');
@@ -47,31 +53,28 @@ async function saveFileAsync(path: string, content: string): Promise<void> {
   return fs.promises.writeFile(path, content, 'utf8');
 }
 
-function addLines(content: string, find: string | RegExp, offset: number, toAdd: string[]) {
-  const lines = content.split('\n');
-
-  let lineIndex = lines.findIndex((line) => line.match(find));
-
-  for (const newLine of toAdd) {
-    if (!content.includes(newLine)) {
-      lines.splice(lineIndex + offset, 0, newLine);
-      lineIndex++;
+function findClosingBracketMatchIndex(str: string, pos: number) {
+  if (str[pos] !== '(') {
+    throw new Error("No '(' at index " + pos);
+  }
+  let depth = 1;
+  for (let i = pos + 1; i < str.length; i++) {
+    switch (str[i]) {
+      case '(':
+        depth++;
+        break;
+      case ')':
+        if (--depth === 0) {
+          return i;
+        }
+        break;
     }
   }
-
-  return lines.join('\n');
+  return -1; // No matching closing parenthesis
 }
 
-function replaceLine(content: string, find: string | RegExp, replace: string) {
-  const lines = content.split('\n');
-
-  if (!content.includes(replace)) {
-    const lineIndex = lines.findIndex((line) => line.match(find));
-    lines.splice(lineIndex, 1, replace);
-  }
-
-  return lines.join('\n');
-}
+const replaceBetween = (origin: string, startIndex: number, endIndex: number, insertion: string) =>
+  `${origin.substring(0, startIndex)}${insertion}${origin.substring(endIndex)}`;
 
 function addJavaImports(javaSource: string, javaImports: string[]): string {
   const lines = javaSource.split('\n');
@@ -178,31 +181,56 @@ const withDevLauncherApplication: ConfigPlugin = (config) => {
   ]);
 };
 
+export function modifyJavaMainActivity(content: string): string {
+  content = addJavaImports(content, [DEV_LAUNCHER_ANDROID_IMPORT, 'android.content.Intent']);
+
+  if (!content.includes('onNewIntent')) {
+    const lines = content.split('\n');
+    const onCreateIndex = lines.findIndex((line) => line.includes('public class MainActivity'));
+
+    lines.splice(onCreateIndex + 1, 0, DEV_LAUNCHER_ON_NEW_INTENT);
+
+    content = lines.join('\n');
+  }
+  if (!content.includes(DEV_LAUNCHER_HANDLE_INTENT)) {
+    content = addLines(content, /super\.onNewIntent\(intent\)/, 0, [DEV_LAUNCHER_HANDLE_INTENT]);
+  }
+
+  if (!content.includes('DevLauncherController.wrapReactActivityDelegate')) {
+    const activityDelegateMatches = Array.from(
+      content.matchAll(/new ReactActivityDelegate(Wrapper)/g)
+    );
+
+    if (activityDelegateMatches.length !== 1) {
+      WarningAggregator.addWarningAndroid(
+        'expo-dev-launcher',
+        `Failed to wrap 'ReactActivityDelegate'
+See the expo-dev-client installation instructions to modify your MainActivity.java manually: ${InstallationPage}`
+      );
+      return content;
+    }
+
+    const activityDelegateMatch = activityDelegateMatches[0];
+    const matchIndex = activityDelegateMatch.index!;
+    const openingBracketIndex = matchIndex + activityDelegateMatch[0].length; // next character after `new ReactActivityDelegateWrapper`
+
+    const closingBracketIndex = findClosingBracketMatchIndex(content, openingBracketIndex);
+    const reactActivityDelegateDeclaration = content.substring(matchIndex, closingBracketIndex + 1);
+
+    content = replaceBetween(
+      content,
+      matchIndex,
+      closingBracketIndex + 1,
+      DEV_LAUNCHER_WRAPPED_ACTIVITY_DELEGATE(reactActivityDelegateDeclaration)
+    );
+  }
+  return content;
+}
+
 const withDevLauncherActivity: ConfigPlugin = (config) => {
   return withMainActivity(config, (config) => {
     if (config.modResults.language === 'java') {
-      let content = addJavaImports(config.modResults.contents, [
-        DEV_LAUNCHER_ANDROID_IMPORT,
-        'android.content.Intent',
-      ]);
-
-      if (!content.includes(DEV_LAUNCHER_ON_NEW_INTENT)) {
-        const lines = content.split('\n');
-        const onCreateIndex = lines.findIndex((line) => line.includes('public class MainActivity'));
-
-        lines.splice(onCreateIndex + 1, 0, DEV_LAUNCHER_ON_NEW_INTENT);
-
-        content = lines.join('\n');
-      }
-
-      if (!content.includes('DevLauncherController.wrapReactActivityDelegate')) {
-        content = content.replace(
-          /(new ReactActivityDelegate(.*|\s)*});$/m,
-          DEV_LAUNCHER_WRAPPED_ACTIVITY_DELEGATE
-        );
-      }
-
-      config.modResults.contents = content;
+      config.modResults.contents = modifyJavaMainActivity(config.modResults.contents);
     } else {
       WarningAggregator.addWarningAndroid(
         'expo-dev-launcher',
@@ -220,7 +248,8 @@ const withDevLauncherPodfile: ConfigPlugin = (config) => {
     'ios',
     async (config) => {
       await editPodfile(config, (podfile) => {
-        podfile = podfile.replace("platform :ios, '10.0'", "platform :ios, '11.0'");
+        // replace all iOS versions below 12
+        podfile = podfile.replace(/platform :ios, '((\d\.0)|(1[0-1].0))'/, "platform :ios, '12.0'");
         // Match both variations of Ruby config:
         // unknown: pod 'expo-dev-launcher', path: '../node_modules/expo-dev-launcher', :configurations => :debug
         // Rubocop: pod 'expo-dev-launcher', path: '../node_modules/expo-dev-launcher', configurations: :debug
@@ -245,11 +274,8 @@ const withDevLauncherPodfile: ConfigPlugin = (config) => {
 const withErrorHandling: ConfigPlugin = (config) => {
   const injectErrorHandlers = async (config: ExportedConfigWithProps) => {
     await editIndex(config, (index) => {
-      if (
-        !index.includes(DEV_LAUNCHER_JS_REGISTER_ERROR_HANDLERS) &&
-        !index.includes(DEV_LAUNCHER_JS_REGISTER_ERROR_HANDLERS_VIA_LAUNCHER)
-      ) {
-        index = DEV_LAUNCHER_JS_REGISTER_ERROR_HANDLERS + ';\n\n' + index;
+      if (!DEV_LAUNCHER_JS_REGISTER_ERROR_HANDLERS_REGEX.test(index)) {
+        index = `import 'expo-dev-client';\n\n${index}`;
       }
       return index;
     });

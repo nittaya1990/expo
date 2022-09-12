@@ -16,20 +16,19 @@
       "apps/*",
       "apps/test-suite/puppeteer-test",
       "home",
-      "packages/*",
-      "packages/@unimodules/*",
-      "react-native-lab/react-native"
+      "packages/*"
     ]
   },
   "resolutions": {
-    "react-native": "0.64.2"
+    "react-native": "0.66.4",
+    "**/util": "~0.12.4"
   },
   "dependencies": {
-    "@expo/config-types": "^42.0.0",
-    "eslint": "^7.31.0",
+    "@expo/config-types": "^43.0.1",
+    "eslint": "^8.6.0",
     "expo-yarn-workspaces": "*",
     "jsc-android": "^245459.0.0",
-    "prettier": "^2.3.1",
+    "prettier": "^2.4.1",
     "yarn-deduplicate": "^3.1.0"
   }
 }

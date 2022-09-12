@@ -16,14 +16,14 @@ Expo CLI is a command line app that is the main interface between a developer an
 
 - [Node.js LTS release](https://nodejs.org/en/)
 - [Git](https://git-scm.com)
-- [Watchman](https://facebook.github.io/watchman/docs/install#buildinstall) for macOS users
+- [Watchman](https://facebook.github.io/watchman/docs/install#buildinstall) for macOS or Linux users
 
 > Only Node.js LTS releases (even-numbered) are recommended. As Node.js [officially states](https://nodejs.org/en/about/releases/), "Production applications should only use Active LTS or Maintenance LTS releases."
 
 ### Recommended Tools
 
 - [VSCode Editor](https://code.visualstudio.com/download)
-  - [VSCode Expo Extension](https://marketplace.visualstudio.com/items?itemName=byCedric.vscode-expo) for `app.json` debugging and autocomplete.
+  - [VSCode Expo Extension](https://marketplace.visualstudio.com/items?itemName=byCedric.vscode-expo) for **app.json** debugging and autocomplete.
 - [Yarn](https://classic.yarnpkg.com/en/docs/install)
 - Windows users: [PowerShell](https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell-core-on-windows), Bash via WSL, or the VSCode terminal.
 

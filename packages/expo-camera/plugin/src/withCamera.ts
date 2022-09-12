@@ -20,8 +20,8 @@ const MICROPHONE_USAGE = 'Allow $(PRODUCT_NAME) to access your microphone';
 // It's ok to have multiple allprojects.repositories, so we create a new one since it's cheaper than tokenizing
 // the existing block to find the correct place to insert our camera maven.
 const gradleMaven = [
-  `def mavenPath = new File(["node", "--print", "require.resolve('expo-camera/package.json')"].execute().text.trim(), "../android/maven")`,
-  `allprojects { repositories { maven { url(mavenPath) } } }`,
+  `def expoCameraMavenPath = new File(["node", "--print", "require.resolve('expo-camera/package.json')"].execute(null, rootDir).text.trim(), "../android/maven")`,
+  `allprojects { repositories { maven { url(expoCameraMavenPath) } } }`,
 ].join('\n');
 
 const withAndroidCameraGradle: ConfigPlugin = (config) => {
@@ -78,10 +78,12 @@ function appendContents({
   return { contents: src, didClear: false, didMerge: false };
 }
 
-const withCamera: ConfigPlugin<{
-  cameraPermission?: string;
-  microphonePermission?: string;
-} | void> = (config, { cameraPermission, microphonePermission } = {}) => {
+const withCamera: ConfigPlugin<
+  {
+    cameraPermission?: string;
+    microphonePermission?: string;
+  } | void
+> = (config, { cameraPermission, microphonePermission } = {}) => {
   config = withInfoPlist(config, (config) => {
     config.modResults.NSCameraUsageDescription =
       cameraPermission || config.modResults.NSCameraUsageDescription || CAMERA_USAGE;

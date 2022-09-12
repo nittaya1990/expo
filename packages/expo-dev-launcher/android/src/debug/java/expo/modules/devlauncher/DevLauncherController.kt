@@ -12,6 +12,8 @@ import com.facebook.react.ReactPackage
 import com.facebook.react.bridge.ReactContext
 import expo.interfaces.devmenu.DevMenuManagerInterface
 import expo.interfaces.devmenu.DevMenuManagerProviderInterface
+import expo.modules.devlauncher.helpers.DevLauncherInstallationIDHelper
+import expo.modules.devlauncher.helpers.replaceEXPScheme
 import expo.modules.devlauncher.helpers.getAppUrlFromDevLauncherUrl
 import expo.modules.devlauncher.helpers.getFieldInClassHierarchy
 import expo.modules.devlauncher.helpers.isDevLauncherUrl
@@ -27,6 +29,9 @@ import expo.modules.devlauncher.launcher.DevLauncherIntentRegistryInterface
 import expo.modules.devlauncher.launcher.DevLauncherLifecycle
 import expo.modules.devlauncher.launcher.DevLauncherReactActivityDelegateSupplier
 import expo.modules.devlauncher.launcher.DevLauncherRecentlyOpenedAppsRegistry
+import expo.modules.devlauncher.launcher.errors.DevLauncherAppError
+import expo.modules.devlauncher.launcher.errors.DevLauncherErrorActivity
+import expo.modules.devlauncher.launcher.errors.DevLauncherUncaughtExceptionHandler
 import expo.modules.devlauncher.launcher.loaders.DevLauncherAppLoaderFactoryInterface
 import expo.modules.devlauncher.launcher.manifest.DevLauncherManifestParser
 import expo.modules.devlauncher.launcher.menu.DevLauncherMenuDelegate
@@ -35,7 +40,8 @@ import expo.modules.devlauncher.react.activitydelegates.DevLauncherReactActivity
 import expo.modules.devlauncher.tests.DevLauncherTestInterceptor
 import expo.modules.manifests.core.Manifest
 import expo.modules.updatesinterface.UpdatesInterface
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import org.koin.core.component.get
@@ -61,6 +67,7 @@ class DevLauncherController private constructor()
   private val httpClient: OkHttpClient by inject()
   private val lifecycle: DevLauncherLifecycle by inject()
   private val pendingIntentRegistry: DevLauncherIntentRegistryInterface by inject()
+  private val installationIDHelper: DevLauncherInstallationIDHelper by inject()
   val internalUpdatesInterface: UpdatesInterface? by optInject()
   var devMenuManager: DevMenuManagerInterface? = null
   override var updatesInterface: UpdatesInterface?
@@ -68,6 +75,7 @@ class DevLauncherController private constructor()
     set(value) = DevLauncherKoinContext.app.koin.loadModules(listOf(module {
       single { value }
     }))
+  override val coroutineScope = CoroutineScope(Dispatchers.Default)
 
   override val devClientHost = DevLauncherClientHost((context as Application), DEV_LAUNCHER_HOST)
 
@@ -99,16 +107,17 @@ class DevLauncherController private constructor()
     try {
       ensureHostWasCleared(appHost, activityToBeInvalidated = mainActivity)
 
-      val manifestParser = DevLauncherManifestParser(httpClient, url)
+      val parsedUrl = replaceEXPScheme(url, "http")
+      val manifestParser = DevLauncherManifestParser(httpClient, parsedUrl, installationIDHelper.getOrCreateInstallationID(context))
       val appIntent = createAppIntent()
 
       internalUpdatesInterface?.reset()
 
       val appLoaderFactory = get<DevLauncherAppLoaderFactoryInterface>()
-      val appLoader = appLoaderFactory.createAppLoader(url, manifestParser)
+      val appLoader = appLoaderFactory.createAppLoader(parsedUrl, manifestParser)
       useDeveloperSupport = appLoaderFactory.shouldUseDeveloperSupport()
       manifest = appLoaderFactory.getManifest()
-      manifestURL = url
+      manifestURL = parsedUrl
 
       val appLoaderListener = appLoader.createOnDelegateWillBeCreatedListener()
       lifecycle.addListener(appLoaderListener)
@@ -116,8 +125,8 @@ class DevLauncherController private constructor()
 
       // Note that `launch` method is a suspend one. So the execution will be stopped here until the method doesn't finish.
       if (appLoader.launch(appIntent)) {
-        recentlyOpedAppsRegistry.appWasOpened(url, appLoader.getAppName())
-        latestLoadedApp = url
+        recentlyOpedAppsRegistry.appWasOpened(parsedUrl, appLoader.getAppName())
+        latestLoadedApp = parsedUrl
         // Here the app will be loaded - we can remove listener here.
         lifecycle.removeListener(appLoaderListener)
       } else {
@@ -183,8 +192,12 @@ class DevLauncherController private constructor()
           return true
         }
 
-        GlobalScope.launch {
-          loadApp(appUrl, activityToBeInvalidated)
+        coroutineScope.launch {
+          try {
+            loadApp(appUrl, activityToBeInvalidated)
+          } catch (e: Throwable) {
+            DevLauncherErrorActivity.showFatalError(context, DevLauncherAppError(e.message, e))
+          }
         }
         return true
       }
@@ -305,6 +318,7 @@ class DevLauncherController private constructor()
     }.apply { addFlags(NEW_ACTIVITY_FLAGS) }
 
   companion object {
+    private var sErrorHandlerWasInitialized = false
     private var sLauncherClass: Class<*>? = null
     internal var sAdditionalPackages: List<ReactPackage>? = null
 
@@ -325,6 +339,14 @@ class DevLauncherController private constructor()
       val testInterceptor = DevLauncherKoinContext.app.koin.get<DevLauncherTestInterceptor>()
       if (!testInterceptor.allowReinitialization()) {
         check(!wasInitialized()) { "DevelopmentClientController was initialized." }
+      }
+      if (!sErrorHandlerWasInitialized && context is Application) {
+        val handler = DevLauncherUncaughtExceptionHandler(
+          context,
+          Thread.getDefaultUncaughtExceptionHandler()
+        )
+        Thread.setDefaultUncaughtExceptionHandler(handler)
+        sErrorHandlerWasInitialized = true
       }
 
       MenuDelegateWasInitialized = false

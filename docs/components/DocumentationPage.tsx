@@ -54,6 +54,8 @@ type Props = {
   title: string;
   asPath: string;
   sourceCodeUrl?: string;
+  /** API Page NPM package name, exposed through context for various React components that consistently use the package name. */
+  packageName?: string;
   tocVisible: boolean;
   /* If the page should not show up in the Algolia Docsearch results */
   hideFromSearch?: boolean;
@@ -168,6 +170,10 @@ export default class DocumentationPage extends React.Component<Props, State> {
     );
   };
 
+  private isEasPath = () => {
+    return some(navigation.easDirectories, name => this.props.url.pathname.startsWith(`/${name}`));
+  };
+
   private getCanonicalUrl = () => {
     if (this.isReferencePath()) {
       return `https://docs.expo.dev${Utilities.replaceVersionInUrl(
@@ -215,6 +221,8 @@ export default class DocumentationPage extends React.Component<Props, State> {
       return 'featurePreview';
     } else if (this.isPreviewPath()) {
       return 'preview';
+    } else if (this.isEasPath()) {
+      return 'eas';
     }
 
     return 'general';
@@ -313,7 +321,8 @@ export default class DocumentationPage extends React.Component<Props, State> {
         {!this.state.isMenuActive ? (
           <div css={STYLES_DOCUMENT}>
             <H1>{this.props.title}</H1>
-            <DocumentationPageContext.Provider value={{ version }}>
+            <DocumentationPageContext.Provider
+              value={{ version, packageName: this.props.packageName }}>
               {this.props.children}
             </DocumentationPageContext.Provider>
             <DocumentationFooter
@@ -327,7 +336,8 @@ export default class DocumentationPage extends React.Component<Props, State> {
           <div>
             <div css={[STYLES_DOCUMENT, HIDDEN_ON_MOBILE]}>
               <H1>{this.props.title}</H1>
-              <DocumentationPageContext.Provider value={{ version }}>
+              <DocumentationPageContext.Provider
+                value={{ version, packageName: this.props.packageName }}>
                 {this.props.children}
               </DocumentationPageContext.Provider>
               <DocumentationFooter

@@ -9,7 +9,7 @@ import okio.Sink
 import java.io.IOException
 
 @FunctionalInterface
-interface RequestBodyDecorator {
+fun interface RequestBodyDecorator {
   fun decorate(requestBody: RequestBody): RequestBody
 }
 
@@ -44,6 +44,7 @@ class CountingRequestBody(
 
   override fun writeTo(sink: BufferedSink) {
     val countingSink = CountingSink(sink, this, progressListener)
+
     val bufferedSink = Okio.buffer(countingSink)
     requestBody.writeTo(bufferedSink)
     bufferedSink.flush()

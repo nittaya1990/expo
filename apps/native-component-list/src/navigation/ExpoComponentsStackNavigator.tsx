@@ -56,7 +56,7 @@ export const Screens = [
   },
   {
     getComponent() {
-      return optionalRequire(() => require('../screens/BlurViewScreen'));
+      return optionalRequire(() => require('../screens/BlurView/BlurViewScreen'));
     },
     name: 'BlurView',
   },
@@ -291,6 +291,14 @@ export const Screens = [
     name: 'HeadlessRendering',
     options: { title: 'Headless rendering' },
     route: 'gl/headlessrendering',
+  },
+  {
+    getComponent() {
+      return optionalRequire(() => require('../screens/GL/GLReanimatedExample'));
+    },
+    name: 'ReanimatedWorklets',
+    options: { title: 'Reanimated worklets + gesture handler' },
+    route: 'gl/reanimated',
   },
   {
     getComponent() {

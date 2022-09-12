@@ -17,7 +17,7 @@ Provides an API for interacting with the device's system calendars, events, remi
 
 ## Configuration
 
-You must add the following permissions to your `app.json`.
+You must add the following permissions to your **app.json**.
 - Android requires `READ_CALENDAR` & `WRITE_CALENDAR` inside the `expo.android.permissions` array.
 - iOS requires the `NSRemindersUsageDescription` key be added to `expo.ios.infoPlist` with a string value describing the reason for the permission request.
 
@@ -51,9 +51,8 @@ export default function App() {
 }
 
 async function getDefaultCalendarSource() {
-  const calendars = await Calendar.getCalendarsAsync(Calendar.EntityTypes.EVENT);
-  const defaultCalendars = calendars.filter(each => each.source.name === 'Default');
-  return defaultCalendars[0].source;
+  const defaultCalendar = await Calendar.getDefaultCalendarAsync();
+  return defaultCalendar.source;
 }
 
 async function createCalendar() {

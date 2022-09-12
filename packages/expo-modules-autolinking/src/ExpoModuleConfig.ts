@@ -16,8 +16,42 @@ export class ExpoModuleConfig {
   /**
    * Returns a list of names of Swift native modules classes to put to the generated modules provider file.
    */
-  iosModulesClassNames() {
-    return this.rawConfig.ios?.modulesClassNames ?? [];
+  iosModules() {
+    const iosConfig = this.rawConfig.ios;
+
+    // `modulesClassNames` is a legacy name for the same config.
+    return iosConfig?.modules ?? iosConfig?.modulesClassNames ?? [];
+  }
+
+  /**
+   * Returns a list of names of Swift classes that receives AppDelegate life-cycle events.
+   */
+  iosAppDelegateSubscribers(): string[] {
+    return this.rawConfig.ios?.appDelegateSubscribers ?? [];
+  }
+
+  /**
+   * Returns a list of names of Swift classes that implement `ExpoReactDelegateHandler`.
+   */
+  iosReactDelegateHandlers(): string[] {
+    return this.rawConfig.ios?.reactDelegateHandlers ?? [];
+  }
+
+  /**
+   * Returns a podspec path defined by the module author.
+   */
+  iosPodspecPath(): string | undefined {
+    return this.rawConfig.ios?.podspecPath;
+  }
+
+  /**
+   * Returns a list of names of Kotlin native modules classes to put to the generated package provider file.
+   */
+  androidModules() {
+    const androidConfig = this.rawConfig.android;
+
+    // `modulesClassNames` is a legacy name for the same config.
+    return androidConfig?.modules ?? androidConfig?.modulesClassNames ?? [];
   }
 
   /**

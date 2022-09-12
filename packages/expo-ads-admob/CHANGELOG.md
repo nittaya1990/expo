@@ -10,6 +10,14 @@
 
 ### 💡 Others
 
+- Updated `@expo/config-plugins` from `4.0.2` to `4.0.14` ([#15621](https://github.com/expo/expo/pull/15621) by [@EvanBacon](https://github.com/EvanBacon))
+
+## 12.0.0 — 2021-12-03
+
+### 🛠 Breaking changes
+
+- Remove deprecated `setTestDeviceID` method. ([#15091](https://github.com/expo/expo/pull/15091) by [@Simek](https://github.com/Simek))
+
 ## 11.0.1 — 2021-10-01
 
 _This version does not introduce any user-facing changes._

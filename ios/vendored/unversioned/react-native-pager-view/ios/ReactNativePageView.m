@@ -47,6 +47,7 @@
         _cachedControllers = [NSHashTable weakObjectsHashTable];
         _overdrag = NO;
         _layoutDirection = @"ltr";
+        _previousBounds = CGRectMake(0, 0, 0, 0);
     }
     return self;
 }
@@ -55,8 +56,13 @@
     [super layoutSubviews];
     if (self.reactPageViewController) {
         [self shouldScroll:self.scrollEnabled];
-        //Below line fix bug, where the view does not update after orientation changed.
-        [self updateDataSource];
+
+        if (!CGRectEqualToRect(self.previousBounds, CGRectMake(0, 0, 0, 0)) && !CGRectEqualToRect(self.bounds, self.previousBounds)) {
+            // Below line fix bug, where the view does not update after orientation changed.
+            [self updateDataSource];
+        }
+
+        self.previousBounds = CGRectMake(self.bounds.origin.x, self.bounds.origin.y, self.bounds.size.width, self.bounds.size.height);
     }
 }
 
@@ -159,14 +165,16 @@
         [self setReactViewControllers:self.initialPage
                                  with:initialController
                             direction:UIPageViewControllerNavigationDirectionForward
-                             animated:YES];
+                             animated:YES
+             shouldCallOnPageSelected:YES];
     }
 }
 
 - (void)setReactViewControllers:(NSInteger)index
                            with:(UIViewController *)controller
                       direction:(UIPageViewControllerNavigationDirection)direction
-                       animated:(BOOL)animated {
+                       animated:(BOOL)animated
+                       shouldCallOnPageSelected:(BOOL)shouldCallOnPageSelected {
     if (self.reactPageViewController == nil) {
         return;
     }
@@ -183,7 +191,9 @@
         
         if (strongSelf.eventDispatcher) {
             if (strongSelf.lastReportedIndex != strongSelf.currentIndex) {
-                [strongSelf.eventDispatcher sendEvent:[[RCTOnPageSelected alloc] initWithReactTag:strongSelf.reactTag position:@(index) coalescingKey:coalescingKey]];
+                if (shouldCallOnPageSelected) {
+                    [strongSelf.eventDispatcher sendEvent:[[RCTOnPageSelected alloc] initWithReactTag:strongSelf.reactTag position:@(index) coalescingKey:coalescingKey]];
+                }
                 strongSelf.lastReportedIndex = strongSelf.currentIndex;
             }
         }
@@ -236,33 +246,40 @@
     long diff = labs(index - _currentIndex);
     
     if (isForward && diff > 0) {
-        for (NSInteger i=_currentIndex+1; i<=index; i++) {
-            [self goToViewController:i direction:direction animated:animated];
+        for (NSInteger i=_currentIndex; i<=index; i++) {
+            if (i == _currentIndex) {
+                continue;
+            }
+            [self goToViewController:i direction:direction animated:animated shouldCallOnPageSelected: i == index];
         }
     }
     
     if (!isForward && diff > 0) {
-        for (NSInteger i=_currentIndex-1; i>=index; i--) {
-            if (i >=0) {
-                [self goToViewController:i direction:direction animated:animated];
+        for (NSInteger i=_currentIndex; i>=index; i--) {
+            // Prevent removal of one or many pages at a time
+            if (index == _currentIndex || i >= numberOfPages) {
+                continue;
             }
+            [self goToViewController:i direction:direction animated:animated shouldCallOnPageSelected: i == index];
         }
     }
     
     if (diff == 0) {
-        [self goToViewController:index direction:direction animated:animated];
+        [self goToViewController:index direction:direction animated:animated shouldCallOnPageSelected:YES];
     }
 }
 
 - (void)goToViewController:(NSInteger)index
                             direction:(UIPageViewControllerNavigationDirection)direction
-                            animated:(BOOL)animated {
+                            animated:(BOOL)animated
+                            shouldCallOnPageSelected:(BOOL)shouldCallOnPageSelected {
     UIView *viewToDisplay = self.reactSubviews[index];
     UIViewController *controllerToDisplay = [self findAndCacheControllerForView:viewToDisplay];
     [self setReactViewControllers:index
                              with:controllerToDisplay
                         direction:direction
-                         animated:animated];
+                         animated:animated
+                        shouldCallOnPageSelected:shouldCallOnPageSelected];
 }
     
 - (UIViewController *)findAndCacheControllerForView:(UIView *)viewToDisplay {
@@ -320,7 +337,6 @@
         self.currentIndex = currentIndex;
         self.currentView = currentVC.view;
         self.reactPageIndicatorView.currentPage = currentIndex;
-        
         [self.eventDispatcher sendEvent:[[RCTOnPageSelected alloc] initWithReactTag:self.reactTag position:@(currentIndex) coalescingKey:_coalescingKey++]];
         [self.eventDispatcher sendEvent:[[RCTOnPageScrollEvent alloc] initWithReactTag:self.reactTag position:@(currentIndex) offset:@(0.0)]];
         self.lastReportedIndex = currentIndex;

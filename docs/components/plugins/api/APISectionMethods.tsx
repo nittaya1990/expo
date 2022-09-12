@@ -4,9 +4,14 @@ import ReactMarkdown from 'react-markdown';
 import { InlineCode } from '~/components/base/code';
 import { LI, UL } from '~/components/base/list';
 import { H2, H3Code, H4 } from '~/components/plugins/Headings';
-import { MethodDefinitionData, MethodSignatureData } from '~/components/plugins/api/APIDataTypes';
+import {
+  MethodDefinitionData,
+  MethodSignatureData,
+  PropData,
+} from '~/components/plugins/api/APIDataTypes';
 import {
   CommentTextBlock,
+  getPlatformTags,
   listParams,
   mdComponents,
   renderParam,
@@ -14,14 +19,14 @@ import {
 } from '~/components/plugins/api/APISectionUtils';
 
 export type APISectionMethodsProps = {
-  data: MethodDefinitionData[];
+  data: (MethodDefinitionData | PropData)[];
   apiName?: string;
   header?: string;
 };
 
-const renderMethod = (
-  { signatures }: MethodDefinitionData,
-  index: number,
+export const renderMethod = (
+  { signatures = [] }: MethodDefinitionData | PropData,
+  index?: number,
   dataLength?: number,
   apiName?: string,
   header?: string
@@ -34,6 +39,7 @@ const renderMethod = (
           {header !== 'Hooks' ? `${name}(${listParams(parameters)})` : name}
         </InlineCode>
       </H3Code>
+      {getPlatformTags(comment)}
       <CommentTextBlock
         comment={comment}
         beforeContent={
@@ -44,6 +50,7 @@ const renderMethod = (
             </>
           )
         }
+        includePlatforms={false}
       />
       {resolveTypeName(type) !== 'undefined' ? (
         <div>
@@ -58,7 +65,7 @@ const renderMethod = (
           )}
         </div>
       ) : null}
-      {index + 1 !== dataLength && <hr />}
+      {index !== undefined ? index + 1 !== dataLength && <hr /> : null}
     </div>
   ));
 
@@ -66,7 +73,9 @@ const APISectionMethods = ({ data, apiName, header = 'Methods' }: APISectionMeth
   data?.length ? (
     <>
       <H2 key="methods-header">{header}</H2>
-      {data.map((method, index) => renderMethod(method, index, data.length, apiName, header))}
+      {data.map((method: MethodDefinitionData | PropData, index: number) =>
+        renderMethod(method, index, data.length, apiName, header)
+      )}
     </>
   ) : null;
 

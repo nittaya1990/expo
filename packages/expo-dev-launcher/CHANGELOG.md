@@ -4,28 +4,89 @@
 
 ### 🛠 Breaking changes
 
-- Added a native dependency on the `expo-manifests` package. ([#14461](https://github.com/expo/expo/pull/14461) by [@esamelson](https://github.com/esamelson))
-  - This is a breaking change for projects **without `react-native-unimodules` or `expo-modules-core` installed**. In order to upgrade from `expo-dev-client@0.5.1` or below to this version in such projects, the following changes must be made:
-    - In `ios/Podfile`, change the deployment target to `platform :ios, '12.0'` and add the following lines inside the main target:
-    ```ruby
-    pod 'EXJSONUtils', path: '../node_modules/expo-json-utils/ios', :configurations => :debug
-    pod 'EXManifests', path: '../node_modules/expo-manifests/ios', :configurations => :debug
-    ```
-    - In `android/settings.gradle`, add the following lines:
-    ```groovy
-    include ':expo-json-utils'
-    project(':expo-json-utils').projectDir = new File('../node_modules/expo-json-utils/android')
+### 🎉 New features
 
-    include ':expo-manifests'
-    project(':expo-manifests').projectDir = new File('../node_modules/expo-manifests/android')
-    ```
-  - No additional setup is necessary for projects already using `react-native-unimodules` or `expo-modules-core`.
+### 🐛 Bug fixes
+
+- Fix build errors on React Native 0.66 caused by `okio` and `okhttp`. ([#15632](https://github.com/expo/expo/pull/15632) by [@kudo](https://github.com/kudo))
+
+### 💡 Others
+
+## 0.10.1 — 2022-01-17
+
+### 🐛 Bug fixes
+
+- Fix bug on iOS where all URL schemes, rather than just `exp`, were replaced with `http`. ([#15796](https://github.com/expo/expo/pull/15796) by [@esamelson](https://github.com/esamelson))
+- Fix detecting import when using double quotes. ([#15898](https://github.com/expo/expo/pull/15898) by [@janicduplessis](https://github.com/janicduplessis))
+
+## 0.10.0 — 2021-12-22
+
+### 🎉 New features
+
+- Add persisted installation ID and include in manifest requests. ([#15538](https://github.com/expo/expo/pull/15538) by [@esamelson](https://github.com/esamelson))
+- Improve dev session request logic and use device ID when available. ([#15542](https://github.com/expo/expo/pull/15542) by [@esamelson](https://github.com/esamelson))
+- Improve error handling when opening the app from a deep link on Android. ([#15637](https://github.com/expo/expo/pull/15637) by [@lukmccall](https://github.com/lukmccall))
+- Implement redesigned native error screen. ([#15618](https://github.com/expo/expo/pull/15618) & [#15531](https://github.com/expo/expo/pull/15531) by [@lukmccall](https://github.com/lukmccall))
+- Redesign the home screen. ([#15343](https://github.com/expo/expo/pull/15343) by [#ajsmth](https://github.com/ajsmth))
+
+### 💡 Others
+
+- Updated `@expo/config-plugins` from `4.0.2` to `4.0.14` ([#15621](https://github.com/expo/expo/pull/15621) by [@EvanBacon](https://github.com/EvanBacon))
+
+## 0.9.1 — 2021-12-15
+
+### 🐛 Bug fixes
+
+- Fix plugin when `MainActivity.onNewIntent` exists. ([#15459](https://github.com/expo/expo/pull/15459) by [@janicduplessis](https://github.com/janicduplessis))
+- Fix plugin when `expo-updates` is not present. ([#15541](https://github.com/expo/expo/pull/15541) by [@esamelson](https://github.com/esamelson))
+- Include expo-platform header in manifest requests. ([#15563](https://github.com/expo/expo/pull/15563) by [@esamelson](https://github.com/esamelson))
+- Fix plugin compatibility with SDK 44. ([#15562](https://github.com/expo/expo/pull/15562) & [#15570](https://github.com/expo/expo/pull/15570) by [@lukmccall](https://github.com/lukmccall) & [@esamelson](https://github.com/esamelson))
+
+## 0.9.0 — 2021-12-03
+
+### 🎉 New features
+
+- Added support for th React Native `0.66.X`. ([#15242](https://github.com/expo/expo/pull/15242) by [@lukmccall](https://github.com/lukmccall))
+
+### 🐛 Bug fixes
+
+- Fix `No native splash screen registered for given view controller` error happening when project is using both `expo-dev-client` and `expo-splash-screen` packages. ([#14745](https://github.com/expo/expo/pull/14745) by [@kudo](https://github.com/kudo))
+- Fix cannot load url that starts with exp. (by [@lukmccall](https://github.com/lukmccall))
+
+## 0.8.4 — 2021-10-21
+
+### 🐛 Bug fixes
+
+- Fix crash in SDK 42 Android projects. (by [@esamelson](https://github.com/esamelson))
+
+## 0.8.3 — 2021-10-15
+
+### 🐛 Bug fixes
+
+- Fix config plugin compatibility with expo-screen-orientation. ([#14752](https://github.com/expo/expo/pull/14752) by [@esamelson](https://github.com/esamelson))
+
+## 0.8.2 — 2021-10-15
+
+### 🐛 Bug fixes
+
+- Fix `No native splash screen registered for given view controller` error happening when project is using both `expo-dev-client` and `expo-splash-screen` packages. ([#14745](https://github.com/expo/expo/pull/14745) by [@kudo](https://github.com/kudo))
+
+## 0.8.1 — 2021-10-07
+
+_This version does not introduce any user-facing changes._
+
+## 0.8.0 — 2021-10-07
+
+### 🛠 Breaking changes
+
+- Added a native dependency on the `expo-manifests` package. **Projects without `react-native-unimodules` or `expo-modules-core` installed will need to follow the upgrade guide [here](https://docs.expo.dev/clients/upgrading/) when upgrading from an older version of this package.** ([#14461](https://github.com/expo/expo/pull/14461) by [@esamelson](https://github.com/esamelson))
 - Replace Android DevLauncherManifest class with `expo-manifests`. ([#14462](https://github.com/expo/expo/pull/14462) by [@esamelson](https://github.com/esamelson))
 - Replace iOS EXDevLauncherManifest class with `expo-manifests`. ([#14463](https://github.com/expo/expo/pull/14463) by [@esamelson](https://github.com/esamelson))
 
 ### 🎉 New features
 
 - Suppress the `"main" has not been registered` exception if it was caused by a different error. ([#14363](https://github.com/expo/expo/pull/14363) by [@lukmccall](https://github.com/lukmccall))
+- Added support for SDK 43. ([#14633](https://github.com/expo/expo/pull/14633) & [#14635](https://github.com/expo/expo/pull/14635) by [@lukmccall](https://github.com/lukmccall))
 
 ### 🐛 Bug fixes
 

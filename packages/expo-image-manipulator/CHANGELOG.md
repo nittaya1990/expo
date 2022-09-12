@@ -6,9 +6,17 @@
 
 ### 🎉 New features
 
+- Native module on iOS is now written in Swift using the new API. ([#15277](https://github.com/expo/expo/pull/15277) by [@tsapeta](https://github.com/tsapeta))
+
 ### 🐛 Bug fixes
 
 ### 💡 Others
+
+## 10.2.0 — 2021-12-03
+
+### 🐛 Bug fixes
+
+- Fix `Tainted canvases may not be exported` CORS error on web. ([#14739](https://github.com/expo/expo/pull/14739) by [@IjzerenHein](https://github.com/IjzerenHein))
 
 ## 10.1.0 — 2021-10-01
 

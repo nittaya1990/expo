@@ -1,8 +1,9 @@
+import * as Device from 'expo-device';
 import { Subscription } from 'expo-modules-core';
 import * as Notifications from 'expo-notifications';
 import * as TaskManager from 'expo-task-manager';
 import React from 'react';
-import { Alert, Platform, ScrollView, View } from 'react-native';
+import { Alert, Text, Platform, ScrollView, View } from 'react-native';
 
 import registerForPushNotificationsAsync from '../api/registerForPushNotificationsAsync';
 import HeadingText from '../components/HeadingText';
@@ -11,12 +12,13 @@ import MonoText from '../components/MonoText';
 
 const BACKGROUND_NOTIFICATION_TASK = 'BACKGROUND-NOTIFICATION-TASK';
 const BACKGROUND_TASK_SUCCESSFUL = 'Background task successfully ran!';
-const BACKGROUND_TEST_INFO = `To test background notification handling:\n(1) Background the app.\n(2) Send a push notification from your terminal. The push token can be found in your logs, and the command to send a notification can be found at https://docs.expo.io/push-notifications/sending-notifications/#http2-api. On iOS, you need to include "_contentAvailable": "true" in your payload.\n(3) After receiving the notification, check your terminal for:\n"${BACKGROUND_TASK_SUCCESSFUL}"`;
+const BACKGROUND_TEST_INFO = `To test background notification handling:\n(1) Background the app.\n(2) Send a push notification from your terminal. The push token can be found in your logs, and the command to send a notification can be found at https://docs.expo.dev/push-notifications/sending-notifications/#http2-api. On iOS, you need to include "_contentAvailable": "true" in your payload.\n(3) After receiving the notification, check your terminal for:\n"${BACKGROUND_TASK_SUCCESSFUL}"`;
 
 TaskManager.defineTask(BACKGROUND_NOTIFICATION_TASK, (_data) => {
   console.log(BACKGROUND_TASK_SUCCESSFUL);
 });
 
+const remotePushSupported = Device.isDevice;
 export default class NotificationScreen extends React.Component<
   // See: https://github.com/expo/expo/pull/10229#discussion_r490961694
   // eslint-disable-next-line @typescript-eslint/ban-types
@@ -109,6 +111,12 @@ export default class NotificationScreen extends React.Component<
         />
 
         <HeadingText>Push Notifications</HeadingText>
+        {!remotePushSupported && (
+          <Text>
+            ⚠️ Remote push notifications are not supported in the simulator, the following tests
+            should warn accordingly.
+          </Text>
+        )}
         <ListButton onPress={this._sendNotificationAsync} title="Send me a push notification" />
         <BackgroundNotificationHandlingSection />
         <HeadingText>Badge Number</HeadingText>

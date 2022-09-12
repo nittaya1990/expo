@@ -63,16 +63,16 @@ public class UpdatesModule extends ExportedModule {
 
         UpdateEntity launchedUpdate = updatesService.getLaunchedUpdate();
         if (launchedUpdate != null) {
-          constants.put("updateId", launchedUpdate.id.toString());
-          constants.put("manifestString", launchedUpdate.manifest != null ? launchedUpdate.manifest.toString() : "{}");
+          constants.put("updateId", launchedUpdate.getId().toString());
+          constants.put("manifestString", launchedUpdate.getManifest() != null ? launchedUpdate.getManifest().toString() : "{}");
         }
 
         Map<AssetEntity, String> localAssetFiles = updatesService.getLocalAssetFiles();
         if (localAssetFiles != null) {
           Map<String, String> localAssets = new HashMap<>();
           for (AssetEntity asset : localAssetFiles.keySet()) {
-            if (asset.key != null) {
-              localAssets.put(asset.key, localAssetFiles.get(asset));
+            if (asset.getKey() != null) {
+              localAssets.put(asset.getKey(), localAssetFiles.get(asset));
             }
           }
           constants.put("localAssets", localAssets);
@@ -91,7 +91,7 @@ public class UpdatesModule extends ExportedModule {
       // and warn the developer if not. This does not take into account any extra configuration
       // provided at runtime in MainApplication.java, because we don't have access to that in a
       // debug build.
-      UpdatesConfiguration configuration = new UpdatesConfiguration().loadValuesFromMetadata(getContext());
+      UpdatesConfiguration configuration = new UpdatesConfiguration(getContext(), null);
       constants.put("isMissingRuntimeVersion", configuration.isMissingRuntimeVersion());
     }
 
@@ -219,7 +219,7 @@ public class UpdatesModule extends ExportedModule {
                 } else {
                   updatesService.resetSelectionPolicy();
                   updateInfo.putBoolean("isNew", true);
-                  updateInfo.putString("manifestString", update.manifest.toString());
+                  updateInfo.putString("manifestString", update.getManifest().toString());
                 }
                 promise.resolve(updateInfo);
               }

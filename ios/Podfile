@@ -1,5 +1,5 @@
 require_relative './podfile_helpers.rb'
-require File.join(File.dirname(`node --print "require.resolve('react-native/package.json')"`), "scripts/react_native_pods")
+require_relative '../react-native-lab/react-native/scripts/react_native_pods'
 require File.join(File.dirname(`node --print "require.resolve('expo/package.json')"`), "scripts/autolinking")
 
 install! 'cocoapods',
@@ -24,7 +24,11 @@ abstract_target 'Expo Go' do
   use_expo_modules!({
     exclude: [
       'expo-module-template',
-      'expo-in-app-purchases'
+      'expo-in-app-purchases',
+      'expo-dev-menu',
+      'expo-dev-menu-interface',
+      'expo-dev-launcher',
+      'expo-dev-client'
     ],
     # Modules for which to include Tests subspec
     tests: [
@@ -38,9 +42,6 @@ abstract_target 'Expo Go' do
       :inhibit_warnings => false
     }
   })
-
-  # Expo modules that are not unimodules
-  pod 'EXRandom', path: '../packages/expo-random/ios'
 
   # Install vendored pods.
   use_pods! 'vendored/unversioned/**/*.podspec.json'

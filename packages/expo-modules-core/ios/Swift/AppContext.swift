@@ -2,7 +2,7 @@ import UIKit
 /**
  The app context is an interface to a single Expo app.
  */
-public class AppContext {
+public final class AppContext {
   /**
    The module registry for the app context.
    */
@@ -12,6 +12,25 @@ public class AppContext {
    The legacy module registry with modules written in the old-fashioned way.
    */
   public private(set) var legacyModuleRegistry: EXModuleRegistry?
+
+  /**
+   React bridge of the context's app.
+   */
+  public internal(set) weak var reactBridge: RCTBridge?
+
+  /**
+   JSI runtime of the running app.
+   */
+  public internal(set) var runtime: JavaScriptRuntime? {
+    didSet {
+      // When the runtime is unpinned from the context (e.g. deallocated),
+      // we should make sure to release all JS objects from the memory.
+      // Otherwise the JSCRuntime asserts may fail on deallocation.
+      if runtime == nil {
+        releaseRuntimeObjects()
+      }
+    }
+  }
 
   /**
    Designated initializer without modules provider.
@@ -72,13 +91,20 @@ public class AppContext {
   }
 
   /**
+   Provides access to the event emitter from legacy module registry.
+   */
+  public var eventEmitter: EXEventEmitterService? {
+    return legacyModule(implementing: EXEventEmitterService.self)
+  }
+
+  /**
    Starts listening to `UIApplication` notifications.
    */
   private func listenToClientAppNotifications() {
     [
       UIApplication.willEnterForegroundNotification,
       UIApplication.didBecomeActiveNotification,
-      UIApplication.didEnterBackgroundNotification,
+      UIApplication.didEnterBackgroundNotification
     ].forEach { name in
       NotificationCenter.default.addObserver(self, selector: #selector(handleClientAppNotification(_:)), name: name, object: nil)
     }
@@ -101,11 +127,32 @@ public class AppContext {
     }
   }
 
+  // MARK: - Runtime
+
+  /**
+   Unsets runtime objects that we hold for each module.
+   */
+  private func releaseRuntimeObjects() {
+    for module in moduleRegistry {
+      module.javaScriptObject = nil
+    }
+  }
+
+  // MARK: - Deallocation
+
   /**
    Cleans things up before deallocation.
    */
   deinit {
     NotificationCenter.default.removeObserver(self)
     moduleRegistry.post(event: .appContextDestroys)
+  }
+
+  // MARK: - Exceptions
+
+  class DeallocatedAppContextException: Exception {
+    override var reason: String {
+      "The app context has been deallocated"
+    }
   }
 }

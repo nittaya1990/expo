@@ -8,7 +8,39 @@
 
 ### 🐛 Bug fixes
 
+- Allow location to work on Android with only coarse location permission. All apps do not require fine/precise location permission, but in past Expo was enforcing fine/precise even if you only needed coarse level location. ([#15760](https://github.com/expo/expo/pull/15760) by [@Noitidart](https://github.com/Noitidart))
+
 ### 💡 Others
+
+## Unpublished
+
+### 🛠 Breaking changes
+
+- Add an option to whether kill or keep the foreground service when app is killed on Android. ([#15633](https://github.com/expo/expo/pull/15633) by [@islamouzou](https://github.com/islamouzou))
+- Updated `@expo/config-plugins` from `4.0.2` to `4.0.14` ([#15621](https://github.com/expo/expo/pull/15621) by [@EvanBacon](https://github.com/EvanBacon))
+
+## 14.0.1 — 2021-12-15
+
+_This version does not introduce any user-facing changes._
+
+## 14.0.0 — 2021-12-03
+
+### 🛠 Breaking changes
+
+- Remove deprecated `setApiKey` method. ([#14672](https://github.com/expo/expo/pull/14672) by [@Simek](https://github.com/Simek))
+
+### 🎉 New features
+
+- Added steetNumber to `reverseGeocodeAsync` for iOS ([#13556](https://github.com/expo/expo/pull/13556) by [@chrisdrackett](https://github.com/chrisdrackett))
+
+### 🐛 Bug fixes
+
+- Call `jobService.jobFinished` for the finished geofencing jobs. ([#14786](https://github.com/expo/expo/pull/14786) by [@mdmitry01](https://github.com/mdmitry01))
+- Check for null value of `mLocationClient` to prevent a crash ([#15023](https://github.com/expo/expo/pull/15023) by [@zakharchenkoAndrii](https://github.com/zakharchenkoAndrii))
+
+### 💡 Others
+
+- Extract nested `foregroundService` object from `LocationTaskOptions` type to the separate type `LocationTaskServiceOptions`. ([#14672](https://github.com/expo/expo/pull/14672) by [@Simek](https://github.com/Simek))
 
 ## 13.0.1 — 2021-10-01
 
@@ -30,6 +62,7 @@ _This version does not introduce any user-facing changes._
 
 - Fixed `Location.getCurrentPositionAsync` throwing `Location provider is unavailable.` error. ([#14281](https://github.com/expo/expo/pull/14281) by [@m1st4ke](https://github.com/m1st4ke))
 - Fix building errors from use_frameworks! in Podfile. ([#14523](https://github.com/expo/expo/pull/14523) by [@kudo](https://github.com/kudo))
+- Update error message for `LocationUnavailableException` on Android. ([#14539](https://github.com/expo/expo/pull/14539) by [@kylerjensen](https://github.com/kylerjensen))
 
 ### 💡 Others
 

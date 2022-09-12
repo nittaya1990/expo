@@ -2,7 +2,8 @@ import React, { useContext } from 'react';
 
 import DocumentationPageContext from '~/components/DocumentationPageContext';
 import { P } from '~/components/base/paragraph';
-import { GeneratedData } from '~/components/plugins/api/APIDataTypes';
+import { ClassDefinitionData, GeneratedData } from '~/components/plugins/api/APIDataTypes';
+import APISectionClasses from '~/components/plugins/api/APISectionClasses';
 import APISectionComponents from '~/components/plugins/api/APISectionComponents';
 import APISectionConstants from '~/components/plugins/api/APISectionConstants';
 import APISectionEnums from '~/components/plugins/api/APISectionEnums';
@@ -41,12 +42,17 @@ const isListener = ({ name }: GeneratedData) =>
 
 const isProp = ({ name }: GeneratedData) => name.includes('Props') && name !== 'ErrorRecoveryProps';
 
-const isComponent = ({ type, extendedTypes }: GeneratedData) =>
-  type?.name === 'React.FC' ||
-  (extendedTypes && extendedTypes.length ? extendedTypes[0].name === 'Component' : false);
+const isComponent = ({ type, extendedTypes, signatures }: GeneratedData) =>
+  (type?.name && ['React.FC', 'ForwardRefExoticComponent'].includes(type?.name)) ||
+  (extendedTypes && extendedTypes.length ? extendedTypes[0].name === 'Component' : false) ||
+  (signatures && signatures[0]
+    ? signatures[0].type.name === 'Element' ||
+      (signatures[0].parameters && signatures[0].parameters[0].name === 'props')
+    : false);
 
-const isConstant = ({ flags, name, type }: GeneratedData) =>
-  (flags?.isConst || false) && name !== 'default' && type?.name !== 'React.FC';
+const isConstant = ({ name, type }: GeneratedData) =>
+  !['default', 'Constants', 'EventEmitter'].includes(name) &&
+  !(type?.name && ['React.FC', 'ForwardRefExoticComponent'].includes(type?.name));
 
 const renderAPI = (
   packageName: string,
@@ -63,7 +69,7 @@ const renderAPI = (
     const methods = filterDataByKind(
       data,
       TypeDocKind.Function,
-      entry => !isListener(entry) && !isHook(entry)
+      entry => !isListener(entry) && !isHook(entry) && !isComponent(entry)
     );
     const hooks = filterDataByKind(data, TypeDocKind.Function, isHook);
     const eventSubscriptions = filterDataByKind(data, TypeDocKind.Function, isListener);
@@ -99,28 +105,61 @@ const renderAPI = (
     const interfaces = filterDataByKind(data, TypeDocKind.Interface);
     const constants = filterDataByKind(data, TypeDocKind.Variable, entry => isConstant(entry));
 
-    const components = filterDataByKind(data, [TypeDocKind.Variable, TypeDocKind.Class], entry =>
-      isComponent(entry)
+    const components = filterDataByKind(
+      data,
+      [TypeDocKind.Variable, TypeDocKind.Class, TypeDocKind.Function],
+      entry => isComponent(entry)
     );
     const componentsPropNames = components.map(component => `${component.name}Props`);
     const componentsProps = filterDataByKind(props, TypeDocKind.TypeAlias, entry =>
       componentsPropNames.includes(entry.name)
     );
 
+    const classes = filterDataByKind(
+      data,
+      TypeDocKind.Class,
+      entry => !isComponent(entry) && (apiName ? !entry.name.includes(apiName) : true)
+    );
+
+    const componentsChildren = components
+      .map((cls: ClassDefinitionData) =>
+        cls.children?.filter(
+          child =>
+            child.kind === TypeDocKind.Method &&
+            child?.flags?.isExternal !== true &&
+            child.name !== 'render' &&
+            // note(simek): hide unannotated "private" methods
+            !child.name.startsWith('_')
+        )
+      )
+      .flat();
+
+    const methodsNames = methods.map(method => method.name);
+    const staticMethods = componentsChildren.filter(
+      // note(simek): hide duplicate exports for Camera API
+      method => method?.flags?.isStatic === true && !methodsNames.includes(method.name)
+    );
+    const componentMethods = componentsChildren
+      .filter(method => method?.flags?.isStatic !== true && !method?.overwrites)
+      .filter(Boolean);
+
     return (
       <>
         <APISectionComponents data={components} componentsProps={componentsProps} />
+        <APISectionMethods data={staticMethods} header="Static Methods" />
+        <APISectionMethods data={componentMethods} header="Component Methods" />
         <APISectionConstants data={constants} apiName={apiName} />
         <APISectionMethods data={hooks} header="Hooks" />
+        <APISectionClasses data={classes} />
+        {props && !componentsProps.length ? (
+          <APISectionProps data={props} defaultProps={defaultProps} />
+        ) : null}
         <APISectionMethods data={methods} apiName={apiName} />
         <APISectionMethods
           data={eventSubscriptions}
           apiName={apiName}
           header="Event Subscriptions"
         />
-        {props && !componentsProps.length ? (
-          <APISectionProps data={props} defaultProps={defaultProps} />
-        ) : null}
         <APISectionTypes data={types} />
         <APISectionInterfaces data={interfaces} />
         <APISectionEnums data={enums} />

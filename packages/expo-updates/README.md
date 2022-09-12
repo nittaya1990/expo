@@ -79,13 +79,26 @@ The release channel string to send under the `Expo-Release-Channel` header in th
 | ------------------------ | --------------- | --------------------------------------------------- | -------- | --------- |
 | `EXUpdatesCheckOnLaunch` | `checkOnLaunch` | `expo.modules.updates.EXPO_UPDATES_CHECK_ON_LAUNCH` | `ALWAYS` | ❌        |
 
-The condition under which `expo-updates` should automatically check for (and download, if one exists) an update upon app launch. Possible values are `ALWAYS`, `NEVER` (if you want to exclusively control updates via this module's JS API), or `WIFI_ONLY` (if you want the app to automatically download updates only if the device is on an unmetered Wi-Fi connection when it launches).
+The condition under which `expo-updates` should automatically check for (and download, if one exists) an update upon app launch. Possible values are `ALWAYS`, `NEVER` (if you want to exclusively control updates via this module's JS API), `WIFI_ONLY` (if you want the app to automatically download updates only if the device is on an unmetered Wi-Fi connection when it launches), or `ERROR_RECOVERY_ONLY` (if you want the app to automatically download updates only if it encounters a fatal error when launching).
+
+Regardless of the value of this setting, as long as updates are enabled, your app can always use the JS API to manually check for and download updates in the background while your app is running.
 
 | iOS plist/dictionary key | Android Map key | Android meta-data name                             | Default | Required? |
 | ------------------------ | --------------- | -------------------------------------------------- | ------- | --------- |
 | `EXUpdatesLaunchWaitMs`  | `launchWaitMs`  | `expo.modules.updates.EXPO_UPDATES_LAUNCH_WAIT_MS` | `0`     | ❌        |
 
 The number of milliseconds `expo-updates` should delay the app launch and stay on the splash screen while trying to download an update, before falling back to a previously downloaded version. Setting this to `0` will cause the app to always launch with a previously downloaded update and will result in the fastest app launch possible.
+
+| iOS plist/dictionary key          | Android Map key          | Android meta-data name                             | Default | Required? |
+| --------------------------------- | ------------------------ | -------------------------------------------------- | ------- | --------- |
+| `EXUpdatesCodeSigningCertificate` | `codeSigningCertificate` | `expo.modules.updates.CODE_SIGNING_CERTIFICATE`    | (none)  | ❌        |
+| `EXUpdatesCodeSigningMetadata`    | `codeSigningMetadata`    | `expo.modules.updates.CODE_SIGNING_METADATA`       | (none)  | ❌        |
+
+If `codeSigningCertificate` is present, `expo-updates` will enforce manifest code signing using the certificate and any metadata associated with it.
+- `codeSigningCertificate` must be a valid PEM formatted X.509 certificate with code signing extended key usage.
+- `codeSigningMetadata` (optional) must be a JSON object containing:
+    - `alg` - Algorithm used to generate manifest signature. Only `rsa-v1_5-sha256` is currently supported.
+    - `keyid` - Identifier for the key in `codeSigningCertificate`. Used to instruct signing mechanisms when signing or verifying signatures.
 
 ## Customizing automatic setup
 

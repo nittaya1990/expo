@@ -52,6 +52,11 @@ export default function vendoredModulesTransformsFactory(prefix: string): Config
           find: /MessageHandlerName = @"ABI\d+_\d+_\d+ReactNativeWebView";/,
           replaceWith: `MessageHandlerName = @"ReactNativeWebView";`,
         },
+        {
+          paths: 'RNCWebView.m',
+          find: 'NSString *const CUSTOM_SELECTOR',
+          replaceWith: 'static NSString *const CUSTOM_SELECTOR',
+        }
       ],
     },
     'react-native-reanimated': {
@@ -66,7 +71,7 @@ export default function vendoredModulesTransformsFactory(prefix: string): Config
         },
         {
           paths: '*.h',
-          find: /ReactCommon\//g,
+          find: new RegExp(`ReactCommon/(?!${prefix})`, 'g'),
           replaceWith: `ReactCommon/${prefix}`,
         },
         {
@@ -75,7 +80,8 @@ export default function vendoredModulesTransformsFactory(prefix: string): Config
           replaceWith: 'RCTConvert+REATransition.h',
         },
         {
-          find: /(_bridge_reanimated)/g,
+          paths: 'REAUIManager.{h,mm}',
+          find: /(blockSetter|_toBeRemovedRegister|_parentMapper|_animationsManager|_scheduler)/g,
           replaceWith: `${prefix}$1`,
         },
         {
@@ -83,13 +89,30 @@ export default function vendoredModulesTransformsFactory(prefix: string): Config
           find: /(SimAnimationDragCoefficient)\(/g,
           replaceWith: `${prefix}$1(`,
         },
+        {
+          paths: 'REAAnimationsManager.m',
+          find: /^(#import <.*React)\/UIView\+(.+)\.h>/gm,
+          replaceWith: `$1/${prefix}UIView+$2.h>`,
+        },
+        {
+          paths: 'REAAnimationsManager.m',
+          find: `UIView+${prefix}React.h`,
+          replaceWith: `UIView+React.h`,
+        },
+        {
+          paths: 'REAAnimationsManager.m',
+          // `dataComponenetsByName[@"ABI44_0_0RCTView"];` -> `dataComponenetsByName[@"RCTView"];`
+          // the RCTComponentData internal view name is not versioned
+          find: new RegExp(`(RCTComponentData .+)\\[@"${prefix}(RCT.+)"\\];`, 'g'),
+          replaceWith: '$1[@"$2"];'
+        }
       ],
     },
     'react-native-gesture-handler': {
       path: [
         {
-          find: /Handlers\/RN(\w+)Handler\.(h|m)/,
-          replaceWith: `Handlers/${prefix}RN$1Handler.$2`,
+          find: /\bRN(\w+?)\.(h|m|mm)/,
+          replaceWith: `${prefix}RN$1.$2`,
         },
       ],
       content: [
@@ -98,9 +121,11 @@ export default function vendoredModulesTransformsFactory(prefix: string): Config
           replaceWith: `${prefix}UIView+React.h`,
         },
         {
+          // `RNG*` symbols are already prefixed at this point,
+          // but there are some new symbols in RNGH that don't have "G".
           paths: '*.{h,m}',
-          find: /\bRN(\w+)(Handler|GestureRecognizer)\b/g,
-          replaceWith: `${prefix}RN$1$2`,
+          find: /\bRN(\w+?)\b/g,
+          replaceWith: `${prefix}RN$1`,
         },
       ],
     },

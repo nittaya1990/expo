@@ -10,6 +10,14 @@
 
 ### 💡 Others
 
+- Updated `@expo/config-plugins` from `4.0.2` to `4.0.14` ([#15621](https://github.com/expo/expo/pull/15621) by [@EvanBacon](https://github.com/EvanBacon))
+
+## 12.1.0 — 2021-12-03
+
+### 💡 Others
+
+- Rewritten module to Kotlin. ([#14572](https://github.com/expo/expo/pull/14572) by [@mstach60161](https://github.com/mstach60161))
+
 ## 12.0.1 — 2021-10-01
 
 _This version does not introduce any user-facing changes._

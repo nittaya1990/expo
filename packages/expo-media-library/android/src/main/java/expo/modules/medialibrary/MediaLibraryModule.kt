@@ -24,8 +24,20 @@ import expo.modules.core.interfaces.ExpoMethod
 import expo.modules.core.interfaces.services.EventEmitter
 import expo.modules.core.interfaces.services.UIManager
 import expo.modules.interfaces.permissions.Permissions
-import expo.modules.medialibrary.MediaLibraryConstants.*
 import expo.modules.medialibrary.MediaLibraryModule.Action
+import expo.modules.medialibrary.albums.AddAssetsToAlbum
+import expo.modules.medialibrary.albums.CreateAlbum
+import expo.modules.medialibrary.albums.DeleteAlbums
+import expo.modules.medialibrary.albums.GetAlbum
+import expo.modules.medialibrary.albums.GetAlbums
+import expo.modules.medialibrary.albums.RemoveAssetsFromAlbum
+import expo.modules.medialibrary.albums.getAssetsInAlbums
+import expo.modules.medialibrary.albums.migration.CheckIfAlbumShouldBeMigrated
+import expo.modules.medialibrary.albums.migration.MigrateAlbum
+import expo.modules.medialibrary.assets.CreateAsset
+import expo.modules.medialibrary.assets.DeleteAssets
+import expo.modules.medialibrary.assets.GetAssetInfo
+import expo.modules.medialibrary.assets.GetAssets
 
 class MediaLibraryModule(
   context: Context,
@@ -44,22 +56,8 @@ class MediaLibraryModule(
 
   override fun getConstants(): Map<String, Any> {
     return mapOf(
-      "MediaType" to mapOf<String, Any>(
-        "audio" to MEDIA_TYPE_AUDIO,
-        "photo" to MEDIA_TYPE_PHOTO,
-        "video" to MEDIA_TYPE_VIDEO,
-        "unknown" to MEDIA_TYPE_UNKNOWN,
-        "all" to MEDIA_TYPE_ALL,
-      ),
-      "SortBy" to mapOf<String, Any>(
-        "default" to SORT_BY_DEFAULT,
-        "creationTime" to SORT_BY_CREATION_TIME,
-        "modificationTime" to SORT_BY_MODIFICATION_TIME,
-        "mediaType" to SORT_BY_MEDIA_TYPE,
-        "width" to SORT_BY_WIDTH,
-        "height" to SORT_BY_HEIGHT,
-        "duration" to SORT_BY_DURATION,
-      ),
+      "MediaType" to MediaType.getConstants(),
+      "SortBy" to SortBy.getConstants(),
       "CHANGE_LISTENER_NAME" to LIBRARY_DID_CHANGE_EVENT,
     )
   }
@@ -192,7 +190,7 @@ class MediaLibraryModule(
       DeleteAlbums(context, albumIds, promise)
         .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR)
     }
-    val assetIds = MediaLibraryUtils.getAssetsInAlbums(context, *albumIds.toTypedArray())
+    val assetIds = getAssetsInAlbums(context, *albumIds.toTypedArray())
     runActionWithPermissions(assetIds, action, promise)
   }
 
@@ -215,7 +213,7 @@ class MediaLibraryModule(
     val assets = MediaLibraryUtils.getAssetsById(
       context,
       null,
-      *MediaLibraryUtils.getAssetsInAlbums(context, albumId).toTypedArray()
+      *getAssetsInAlbums(context, albumId).toTypedArray()
     )
     if (assets == null) {
       promise.reject(ERROR_NO_ALBUM, "Couldn't find album.")
@@ -244,11 +242,7 @@ class MediaLibraryModule(
       return
     }
 
-    val action = Action action@{ permissionsWereGranted: Boolean ->
-      if (!permissionsWereGranted) {
-        promise.reject(ERROR_NO_PERMISSIONS, ERROR_USER_DID_NOT_GRANT_WRITE_PERMISSIONS_MESSAGE)
-        return@action
-      }
+    val action = actionIfUserGrantedPermission(promise) {
       MigrateAlbum(context, assets, albumDir.name, promise)
         .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR)
     }
@@ -437,7 +431,7 @@ class MediaLibraryModule(
 
     private fun getAssetsTotalCount(mediaType: Int): Int =
       context.contentResolver.query(
-        EXTERNAL_CONTENT,
+        EXTERNAL_CONTENT_URI,
         null,
         "${MediaStore.Files.FileColumns.MEDIA_TYPE} == $mediaType",
         null,

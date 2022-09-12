@@ -111,6 +111,10 @@ public class LocationTaskConsumer extends TaskConsumer implements TaskConsumerIn
       maybeReportDeferredLocations();
     } else {
       try {
+        if(mLocationClient == null){
+          Log.w(TAG, "LocationClient is null.");
+          return;
+        }
         mLocationClient.getLastLocation().addOnCompleteListener(new OnCompleteListener<Location>() {
           @Override
           public void onComplete(@NonNull Task<Location> task) {
@@ -230,6 +234,8 @@ public class LocationTaskConsumer extends TaskConsumer implements TaskConsumerIn
       // extras param name is appId for legacy reasons
       extras.putString("appId", mTask.getAppScopeKey());
       extras.putString("taskName", mTask.getName());
+      extras.putString("killService", serviceOptions.getString("killServiceOnDestroy"));
+
       serviceIntent.putExtras(extras);
 
       context.startForegroundService(serviceIntent);

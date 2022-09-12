@@ -1,5 +1,6 @@
 ---
 title: Feature Preview
+hideTOC: true
 ---
 
 ### What does Feature Preview mean?
@@ -8,10 +9,5 @@ We decided to publish some of our new features as a preview to get feedback from
 
 ### Features in preview
 
-- **Expo Application Services (EAS)**. [Learn more](/eas):
-
-  - **EAS Build**: Compile and sign Android/iOS apps with custom native code in the cloud. Easily distribute your apps to testers without waiting for TestFlight or Google Play. [Learn more](/build/introduction.md).
-
-  - **EAS Submit**: Upload your app to the Apple App Store or Google Play Store from the cloud with one CLI command. [Learn more](/submit/introduction.md).
-
-- **expo-dev-client**: When you need to customize your project beyond the standard runtime provided in Expo Go, you can create a custom development client for your application, install it on your phone, and continue developing. [Learn more](/clients/introduction.md).
+- **expo-dev-client**: When you need to customize your project beyond the standard runtime provided in Expo Go, you can create a development build of your app, install it on your phone, and continue developing. [Learn more](/development/introduction.md).
+- **EAS Update**: EAS Update makes fixing small bugs and pushing quick fixes a snap in between app store submissions. It accomplishes this by allowing an end-user's app to swap out the non-native parts of their app (for example, JS, styling, and image changes) with a new update that contains bug fixes and other updates. [Learn more](/eas-update/introduction.md).

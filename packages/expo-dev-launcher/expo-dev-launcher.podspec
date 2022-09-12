@@ -16,7 +16,7 @@ Pod::Spec.new do |s|
   s.static_framework = true
   s.source_files   = 'ios/**/*.{h,m,swift,cpp}'
   s.preserve_paths = 'ios/**/*.{h,m,swift}'
-  s.exclude_files  = ['ios/Unsafe/**/*.{h,m,mm,swift,cpp}', 'ios/Tests/**/*.{h,m,swift}']
+  s.exclude_files  = 'ios/Unsafe/**/*.{h,m,mm,swift,cpp}', 'ios/Tests/**/*.{h,m,swift}'
   s.requires_arc   = true
   s.header_dir     = 'EXDevLauncher'
 
@@ -40,6 +40,7 @@ Pod::Spec.new do |s|
   s.dependency "expo-dev-menu-interface"
   s.dependency "EXManifests"
   s.dependency "EXUpdatesInterface"
+  s.dependency "expo-dev-menu"
   
   s.subspec 'Unsafe' do |unsafe|
     unsafe.source_files = 'ios/Unsafe/**/*.{h,m,mm,swift,cpp}'
@@ -53,8 +54,13 @@ Pod::Spec.new do |s|
   s.test_spec 'Tests' do |test_spec|
     test_spec.platform     = :ios, '12.0'
     test_spec.source_files = 'ios/Tests/**/*.{h,m,swift}'
+    test_spec.dependency 'Quick'
+    test_spec.dependency 'Nimble'
     test_spec.dependency "React-CoreModules"
     test_spec.dependency "OHHTTPStubs"
+    # `hermes_enabled` should be enabled for test integrations
+    test_spec.dependency 'React-hermes'
+    test_spec.dependency 'hermes-engine'
   end
   
   s.default_subspec = 'Main'

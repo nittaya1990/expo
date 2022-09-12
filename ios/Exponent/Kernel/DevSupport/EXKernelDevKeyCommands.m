@@ -72,6 +72,7 @@ RCT_NOT_IMPLEMENTED(- (instancetype)init)
 
 @end
 
+#if TARGET_IPHONE_SIMULATOR
 @interface UIEvent (UIPhysicalKeyboardEvent)
 
 @property (nonatomic) NSString *_modifiedInput;
@@ -81,7 +82,6 @@ RCT_NOT_IMPLEMENTED(- (instancetype)init)
 @property (nonatomic) long _keyCode;
 
 @end
-
 
 @implementation UIApplication (EXKeyCommands)
 
@@ -107,7 +107,14 @@ RCT_NOT_IMPLEMENTED(- (instancetype)init)
     if (firstResponder) {
       BOOL isTextField = [firstResponder isKindOfClass: [UITextField class]] || [firstResponder isKindOfClass: [UITextView class]];
       
-      if (!isTextField) {
+      // this is a runtime header that is not publicly exported from the Webkit.framework
+      // obfuscating selector WKContentView
+      NSArray<NSString *> *webViewClass = @[ @"WKCo", @"ntentVi", @"ew"];
+      Class WKContentView = NSClassFromString([webViewClass componentsJoinedByString:@""]);
+      
+      BOOL isWebView = [firstResponder isKindOfClass:[WKContentView class]];
+      
+      if (!isTextField && !isWebView) {
         [EXKernelDevKeyCommands handleKeyboardEvent:event];
       }
     }
@@ -115,6 +122,7 @@ RCT_NOT_IMPLEMENTED(- (instancetype)init)
 };
 
 @end
+#endif
 
 @implementation UIResponder (EXKeyCommands)
 
@@ -168,12 +176,15 @@ RCT_NOT_IMPLEMENTED(- (instancetype)init)
                          @selector(keyCommands),
                          @selector(EX_keyCommands));
 
+#if TARGET_IPHONE_SIMULATOR
   SEL originalKeyboardSelector = NSSelectorFromString(@"handleKeyUIEvent:");
   RCTSwapInstanceMethods([UIApplication class],
                          originalKeyboardSelector,
                          @selector(EX_handleKeyUIEventSwizzle:));
+#endif
 }
 
+#if TARGET_IPHONE_SIMULATOR
 +(void)handleKeyboardEvent:(UIEvent *)event
 {
   static NSTimeInterval lastCommand = 0;
@@ -189,6 +200,7 @@ RCT_NOT_IMPLEMENTED(- (instancetype)init)
     }
   }
 }
+#endif
 
 - (instancetype)init
 {
@@ -289,7 +301,7 @@ RCT_NOT_IMPLEMENTED(- (instancetype)init)
   UIKeyCommand *command = [UIKeyCommand keyCommandWithInput:input
                                               modifierFlags:flags
                                                      action:@selector(EX_handleKeyCommand:)];
-
+  
   EXKeyCommand *keyCommand = [[EXKeyCommand alloc] initWithKeyCommand:command block:block];
   [_commands removeObject:keyCommand];
   [_commands addObject:keyCommand];

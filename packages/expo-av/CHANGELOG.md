@@ -8,7 +8,36 @@
 
 ### 🐛 Bug fixes
 
+- Fix iOS build with Expo SDK 44 and React Native 0.65+. ([#15661](https://github.com/expo/expo/pull/15661) by [@schiller-manuel](https://github.com/schiller-manuel))
+
 ### 💡 Others
+
+- Updated `@expo/config-plugins` from `4.0.2` to `4.0.14` ([#15621](https://github.com/expo/expo/pull/15621) by [@EvanBacon](https://github.com/EvanBacon))
+
+## 10.2.0 — 2021-12-03
+
+_This version does not introduce any user-facing changes._
+
+## 10.1.3 — 2021-11-01
+
+### 🐛 Bug fixes
+
+- On Web, do not try to attach fullscreen listener, when component `ref` is `null`. ([#14713](https://github.com/expo/expo/pull/14713) by [@Simek](https://github.com/Simek))
+
+### 💡 Others
+
+- Update component types and event types. ([#14713](https://github.com/expo/expo/pull/14713) by [@Simek](https://github.com/Simek))
+- Mark `status` as an optional field in `VideoFullscreenUpdateEvent` and `VideoReadyForDisplayEvent` types, becouse Web implementation do not return `status` in those events. ([#14713](https://github.com/expo/expo/pull/14713) by [@Simek](https://github.com/Simek))
+
+## 10.1.2 — 2021-10-21
+
+### 🐛 Bug fixes
+
+- Fix require cycles ([#14820](https://github.com/expo/expo/pull/14820) by [@EvanBacon](https://github.com/EvanBacon))
+
+## 10.1.1 — 2021-10-15
+
+_This version does not introduce any user-facing changes._
 
 ## 10.1.0 — 2021-10-01
 

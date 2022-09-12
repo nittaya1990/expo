@@ -2,6 +2,12 @@
 
 #import <EXUpdates/EXUpdatesConfig.h>
 
+#if __has_include(<EXUpdates/EXUpdatesCodeSigningConfiguration-Swift.h>)
+#import <EXUpdates/EXUpdatesCodeSigningConfiguration-Swift.h>
+#else
+#import "EXUpdates-Swift.h"
+#endif
+
 NS_ASSUME_NONNULL_BEGIN
 
 @interface EXUpdatesConfig ()
@@ -14,6 +20,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readwrite, strong) NSString *releaseChannel;
 @property (nonatomic, readwrite, strong) NSNumber *launchWaitMs;
 @property (nonatomic, readwrite, assign) EXUpdatesCheckAutomaticallyConfig checkOnLaunch;
+@property (nonatomic, readwrite, strong, nullable) EXUpdatesCodeSigningConfiguration *codeSigningConfiguration;
 
 @property (nullable, nonatomic, readwrite, strong) NSString *sdkVersion;
 @property (nullable, nonatomic, readwrite, strong) NSString *runtimeVersion;
@@ -21,24 +28,28 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 NSString * const EXUpdatesConfigPlistName = @"Expo";
+
 NSString * const EXUpdatesConfigEnableAutoSetupKey = @"EXUpdatesAutoSetup";
+NSString * const EXUpdatesConfigEnabledKey = @"EXUpdatesEnabled";
+NSString * const EXUpdatesConfigScopeKeyKey = @"EXUpdatesScopeKey";
+NSString * const EXUpdatesConfigUpdateUrlKey = @"EXUpdatesURL";
+NSString * const EXUpdatesConfigRequestHeadersKey = @"EXUpdatesRequestHeaders";
+NSString * const EXUpdatesConfigReleaseChannelKey = @"EXUpdatesReleaseChannel";
+NSString * const EXUpdatesConfigLaunchWaitMsKey = @"EXUpdatesLaunchWaitMs";
+NSString * const EXUpdatesConfigCheckOnLaunchKey = @"EXUpdatesCheckOnLaunch";
+NSString * const EXUpdatesConfigSDKVersionKey = @"EXUpdatesSDKVersion";
+NSString * const EXUpdatesConfigRuntimeVersionKey = @"EXUpdatesRuntimeVersion";
+NSString * const EXUpdatesConfigHasEmbeddedUpdateKey = @"EXUpdatesHasEmbeddedUpdate";
+NSString * const EXUpdatesConfigExpectsSignedManifestKey = @"EXUpdatesExpectsSignedManifest";
+NSString * const EXUpdatesConfigCodeSigningCertificateKey = @"EXUpdatesCodeSigningCertificate";
+NSString * const EXUpdatesConfigCodeSigningMetadataKey = @"EXUpdatesCodeSigningMetadata";
 
-static NSString * const EXUpdatesDefaultReleaseChannelName = @"default";
+NSString * const EXUpdatesConfigReleaseChannelDefaultValue = @"default";
 
-static NSString * const EXUpdatesConfigEnabledKey = @"EXUpdatesEnabled";
-static NSString * const EXUpdatesConfigScopeKeyKey = @"EXUpdatesScopeKey";
-static NSString * const EXUpdatesConfigUpdateUrlKey = @"EXUpdatesURL";
-static NSString * const EXUpdatesConfigRequestHeadersKey = @"EXUpdatesRequestHeaders";
-static NSString * const EXUpdatesConfigReleaseChannelKey = @"EXUpdatesReleaseChannel";
-static NSString * const EXUpdatesConfigLaunchWaitMsKey = @"EXUpdatesLaunchWaitMs";
-static NSString * const EXUpdatesConfigCheckOnLaunchKey = @"EXUpdatesCheckOnLaunch";
-static NSString * const EXUpdatesConfigSDKVersionKey = @"EXUpdatesSDKVersion";
-static NSString * const EXUpdatesConfigRuntimeVersionKey = @"EXUpdatesRuntimeVersion";
-static NSString * const EXUpdatesConfigHasEmbeddedUpdateKey = @"EXUpdatesHasEmbeddedUpdate";
-
-static NSString * const EXUpdatesConfigAlwaysString = @"ALWAYS";
-static NSString * const EXUpdatesConfigWifiOnlyString = @"WIFI_ONLY";
-static NSString * const EXUpdatesConfigNeverString = @"NEVER";
+NSString * const EXUpdatesConfigCheckOnLaunchValueAlways = @"ALWAYS";
+NSString * const EXUpdatesConfigCheckOnLaunchValueWifiOnly = @"WIFI_ONLY";
+NSString * const EXUpdatesConfigCheckOnLaunchValueErrorRecoveryOnly = @"ERROR_RECOVERY_ONLY";
+NSString * const EXUpdatesConfigCheckOnLaunchValueNever = @"NEVER";
 
 @implementation EXUpdatesConfig
 
@@ -48,7 +59,7 @@ static NSString * const EXUpdatesConfigNeverString = @"NEVER";
     _isEnabled = YES;
     _expectsSignedManifest = NO;
     _requestHeaders = @{};
-    _releaseChannel = EXUpdatesDefaultReleaseChannelName;
+    _releaseChannel = EXUpdatesConfigReleaseChannelDefaultValue;
     _launchWaitMs = @(0);
     _checkOnLaunch = EXUpdatesCheckAutomaticallyConfigAlways;
     _hasEmbeddedUpdate = YES;
@@ -81,7 +92,7 @@ static NSString * const EXUpdatesConfigNeverString = @"NEVER";
     _isEnabled = [(NSNumber *)isEnabled boolValue];
   }
   
-  id expectsSignedManifest = config[@"EXUpdatesExpectsSignedManifest"];
+  id expectsSignedManifest = config[EXUpdatesConfigExpectsSignedManifestKey];
   if (expectsSignedManifest && [expectsSignedManifest isKindOfClass:[NSNumber class]]) {
     _expectsSignedManifest = [(NSNumber *)expectsSignedManifest boolValue];
   }
@@ -108,7 +119,7 @@ static NSString * const EXUpdatesConfigNeverString = @"NEVER";
   if (requestHeaders) {
     if(![requestHeaders isKindOfClass:[NSDictionary class]]){
       @throw [NSException exceptionWithName:NSInternalInconsistencyException
-                                     reason:[NSString stringWithFormat:@"PList key '%@' must be a string valued Dictionary.", EXUpdatesConfigRequestHeadersKey]
+                                     reason:[NSString stringWithFormat:@"Plist key \"%@\" must be a string-valued Dictionary.", EXUpdatesConfigRequestHeadersKey]
                                    userInfo:@{}];
     }
     _requestHeaders = (NSDictionary *)requestHeaders;
@@ -116,7 +127,7 @@ static NSString * const EXUpdatesConfigNeverString = @"NEVER";
     for (id key in _requestHeaders){
       if (![_requestHeaders[key] isKindOfClass:[NSString class]]){
         @throw [NSException exceptionWithName:NSInternalInconsistencyException
-                                       reason:[NSString stringWithFormat:@"PList key '%@' must be a string valued Dictionary.", EXUpdatesConfigRequestHeadersKey]
+                                       reason:[NSString stringWithFormat:@"Plist key \"%@\" must be a string-valued Dictionary.", EXUpdatesConfigRequestHeadersKey]
                                      userInfo:@{}];
       }
     }
@@ -138,11 +149,13 @@ static NSString * const EXUpdatesConfigNeverString = @"NEVER";
 
   id checkOnLaunch = config[EXUpdatesConfigCheckOnLaunchKey];
   if (checkOnLaunch && [checkOnLaunch isKindOfClass:[NSString class]]) {
-    if ([EXUpdatesConfigNeverString isEqualToString:(NSString *)checkOnLaunch]) {
+    if ([EXUpdatesConfigCheckOnLaunchValueNever isEqualToString:(NSString *)checkOnLaunch]) {
       _checkOnLaunch = EXUpdatesCheckAutomaticallyConfigNever;
-    } else if ([EXUpdatesConfigWifiOnlyString isEqualToString:(NSString *)checkOnLaunch]) {
+    } else if ([EXUpdatesConfigCheckOnLaunchValueErrorRecoveryOnly isEqualToString:(NSString *)checkOnLaunch]) {
+      _checkOnLaunch = EXUpdatesCheckAutomaticallyConfigErrorRecoveryOnly;
+    } else if ([EXUpdatesConfigCheckOnLaunchValueWifiOnly isEqualToString:(NSString *)checkOnLaunch]) {
       _checkOnLaunch = EXUpdatesCheckAutomaticallyConfigWifiOnly;
-    } else if ([EXUpdatesConfigAlwaysString isEqualToString:(NSString *)checkOnLaunch]) {
+    } else if ([EXUpdatesConfigCheckOnLaunchValueAlways isEqualToString:(NSString *)checkOnLaunch]) {
       _checkOnLaunch = EXUpdatesCheckAutomaticallyConfigAlways;
     }
   }
@@ -161,11 +174,64 @@ static NSString * const EXUpdatesConfigNeverString = @"NEVER";
   if (hasEmbeddedUpdate && [hasEmbeddedUpdate isKindOfClass:[NSNumber class]]) {
     _hasEmbeddedUpdate = [(NSNumber *)hasEmbeddedUpdate boolValue];
   }
+  
+  NSString *codeSigningCertificate;
+  id codeSigningCertificateRaw = config[EXUpdatesConfigCodeSigningCertificateKey];
+  if (codeSigningCertificateRaw && [codeSigningCertificateRaw isKindOfClass:[NSString class]]) {
+    codeSigningCertificate = (NSString *)codeSigningCertificateRaw;
+  }
+  
+  NSDictionary *codeSigningMetadata;
+  id codeSigningMetadataRaw = config[EXUpdatesConfigCodeSigningMetadataKey];
+  if (codeSigningMetadataRaw) {
+    if(![codeSigningMetadataRaw isKindOfClass:[NSDictionary class]]){
+      @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                     reason:[NSString stringWithFormat:@"Plist key \"%@\" must be a string-valued Dictionary.", EXUpdatesConfigCodeSigningMetadataKey]
+                                   userInfo:@{}];
+    }
+    codeSigningMetadata = (NSDictionary *)codeSigningMetadataRaw;
+    for (id key in codeSigningMetadata){
+      if (![codeSigningMetadata[key] isKindOfClass:[NSString class]]){
+        @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                       reason:[NSString stringWithFormat:@"Plist key \"%@\" must be a string-valued Dictionary.", EXUpdatesConfigCodeSigningMetadataKey]
+                                     userInfo:@{}];
+      }
+    }
+  }
+  
+  if (codeSigningCertificate) {
+    _codeSigningConfiguration = [EXUpdatesConfig codeSigningConfigurationForCodeSigningCertificate:codeSigningCertificate
+                                                                               codeSigningMetadata:codeSigningMetadata];
+  }
 }
 
 - (BOOL)isMissingRuntimeVersion
 {
   return (!_runtimeVersion || !_runtimeVersion.length) && (!_sdkVersion || !_sdkVersion.length);
+}
+
++ (nullable EXUpdatesCodeSigningConfiguration *)codeSigningConfigurationForCodeSigningCertificate:(NSString *)codeSigningCertificate
+                                                                              codeSigningMetadata:(nullable NSDictionary *)codeSigningMetadata {
+  NSError *error;
+  EXUpdatesCodeSigningConfiguration *codeSigningConfiguration = [[EXUpdatesCodeSigningConfiguration alloc] initWithCertificate:codeSigningCertificate
+                                                                                                                      metadata:codeSigningMetadata
+                                                                                                                         error:&error];
+  if (error) {
+    NSString *message;
+    if (error.code == EXUpdatesCodeSigningConfigurationErrorCertificateParseError) {
+      message = @"Could not parse code signing certificate";
+    } else if (error.code == EXUpdatesCodeSigningConfigurationErrorCertificateValidityError) {
+      message = @"Certificate not valid";
+    } else if (error.code == EXUpdatesCodeSigningConfigurationErrorCertificateDigitalSignatureNotPresentError) {
+      message = @"Certificate digital signature not present";
+    } else if (error.code == EXUpdatesCodeSigningConfigurationErrorCertificateMissingCodeSigningError) {
+      message = @"Certificate missing code signing extended key usage";
+    }
+    
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:message userInfo:nil];
+  }
+  
+  return codeSigningConfiguration;
 }
 
 + (NSString *)normalizedURLOrigin:(NSURL *)url

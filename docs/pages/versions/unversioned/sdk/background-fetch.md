@@ -1,6 +1,7 @@
 ---
 title: BackgroundFetch
 sourceCodeUrl: 'https://github.com/expo/expo/tree/master/packages/expo-background-fetch'
+packageName: 'expo-background-fetch'
 ---
 
 import APISection from '~/components/plugins/APISection';
@@ -14,7 +15,7 @@ import ImageSpotlight from '~/components/plugins/ImageSpotlight'
 
 ## Known issues
 
-**iOS only**: BackgroundFetch only works when the app is backgrounded, not if the app was terminated or upon device reboot. [Here is the relevant Github issue](https://github.com/expo/expo/issues/3582)
+**iOS only**: BackgroundFetch only works when the app is backgrounded, not if the app was terminated or upon device reboot. [Here is the relevant GitHub issue](https://github.com/expo/expo/issues/3582)
 
 ## Installation
 
@@ -24,7 +25,7 @@ For [managed](../../../introduction/managed-vs-bare.md#managed-workflow) apps, y
 
 Below is an example that demonstrates how to use `expo-background-fetch`.
 
-<SnackInline>
+<SnackInline label="Background Fetch Usage" dependencies={['expo-background-fetch', 'expo-task-manager']}>
 
 ```tsx
 import React from 'react';
@@ -42,7 +43,7 @@ TaskManager.defineTask(BACKGROUND_FETCH_TASK, async () => {
   console.log(`Got background fetch call at date: ${new Date(now).toISOString()}`);
 
   // Be sure to return the successful result type!
-  return BackgroundFetch.Result.NewData;
+  return BackgroundFetch.BackgroundFetchResult.NewData;
 });
 
 // 2. Register the task at some point in your app by providing the same name, and some configuration options for how the background fetch should behave
@@ -63,8 +64,8 @@ async function unregisterBackgroundFetchAsync() {
 }
 
 export default function BackgroundFetchScreen() {
-  const [isRegistered, setIsRegistered] = React.useState<boolean>(false);
-  const [status, setStatus] = React.useState<BackgroundFetch.Status | null>(null);
+  const [isRegistered, setIsRegistered] = React.useState(false);
+  const [status, setStatus] = React.useState(null);
 
   React.useEffect(() => {
     checkStatusAsync();
@@ -92,7 +93,9 @@ export default function BackgroundFetchScreen() {
       <View style={styles.textContainer}>
         <Text>
           Background fetch status:{' '}
-          <Text style={styles.boldText}>{status ? BackgroundFetch.Status[status] : null}</Text>
+          <Text style={styles.boldText}>
+            {status && BackgroundFetch.BackgroundFetchStatus[status]}
+          </Text>
         </Text>
         <Text>
           Background fetch task name:{' '}
@@ -157,7 +160,7 @@ async function registerBackgroundFetchAsync() {
 
 ## Configuration
 
-In order to use `BackgroundFetch` API in standalone, detached and bare apps on iOS, your app has to include background mode in the `Info.plist` file. See [background tasks configuration guide](task-manager.md#configuration-for-standalone-apps) for more details.
+In order to use `BackgroundFetch` API in standalone, detached and bare apps on iOS, your app has to include background mode in the **Info.plist** file. See [background tasks configuration guide](task-manager.md#configuration-for-standalone-apps) for more details.
 
 On Android, this module might listen when the device is starting up. It's necessary to continue working on tasks started with `startOnBoot`. It also keeps devices "awake" that are going idle and asleep fast, to improve reliability of the tasks. Because of this both the `RECEIVE_BOOT_COMPLETED` and `WAKE_LOCK` permissions are added automatically.
 

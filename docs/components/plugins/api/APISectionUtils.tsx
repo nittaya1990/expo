@@ -26,6 +26,7 @@ export enum TypeDocKind {
   Class = 128,
   Interface = 256,
   Property = 1024,
+  Method = 2048,
   TypeAlias = 4194304,
 }
 
@@ -63,12 +64,15 @@ const nonLinkableTypes = [
   'FileList',
   'Manifest',
   'NativeSyntheticEvent',
-  'React.FC',
+  'ParsedQs',
   'ServiceActionResult',
-  'StyleProp',
   'T',
   'TaskOptions',
   'Uint8Array',
+  // React & React Native
+  'React.FC',
+  'ForwardRefExoticComponent',
+  'StyleProp',
   // Cross-package permissions management
   'RequestPermissionMethod',
   'GetPermissionMethod',
@@ -76,9 +80,28 @@ const nonLinkableTypes = [
   'PermissionHookBehavior',
 ];
 
+/**
+ * List of type names that should not be visible in the docs.
+ */
+const omittableTypes = [
+  // Internal React type that adds `ref` prop to the component
+  'RefAttributes',
+];
+
+/**
+ * Map of internal names/type names that should be replaced with something more developer-friendly.
+ */
+const replaceableTypes: Partial<Record<string, string>> = {
+  ForwardRefExoticComponent: 'Component',
+};
+
 const hardcodedTypeLinks: Record<string, string> = {
   Date: 'https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date',
+  Element: 'https://www.typescriptlang.org/docs/handbook/jsx.html#function-component',
   Error: 'https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error',
+  ExpoConfig:
+    'https://github.com/expo/expo-cli/blob/master/packages/config-types/src/ExpoConfig.ts',
+  MessageEvent: 'https://developer.mozilla.org/en-US/docs/Web/API/MessageEvent',
   Omit: 'https://www.typescriptlang.org/docs/handbook/utility-types.html#omittype-keys',
   Pick: 'https://www.typescriptlang.org/docs/handbook/utility-types.html#picktype-keys',
   Partial: 'https://www.typescriptlang.org/docs/handbook/utility-types.html#partialtype',
@@ -89,15 +112,20 @@ const hardcodedTypeLinks: Record<string, string> = {
   ViewStyle: '../../react-native/view-style-props/',
 };
 
-const renderWithLink = (name: string, type?: string) =>
-  nonLinkableTypes.includes(name) ? (
-    name + (type === 'array' ? '[]' : '')
+const renderWithLink = (name: string, type?: string) => {
+  const replacedName = replaceableTypes[name] ?? name;
+
+  return nonLinkableTypes.includes(replacedName) ? (
+    replacedName + (type === 'array' ? '[]' : '')
   ) : (
-    <Link href={hardcodedTypeLinks[name] || `#${name.toLowerCase()}`} key={`type-link-${name}`}>
-      {name}
+    <Link
+      href={hardcodedTypeLinks[replacedName] || `#${replacedName.toLowerCase()}`}
+      key={`type-link-${replacedName}`}>
+      {replacedName}
       {type === 'array' && '[]'}
     </Link>
   );
+};
 
 const renderUnion = (types: TypeDefinitionData[]) =>
   types.map(resolveTypeName).map((valueToRender, index) => (
@@ -117,126 +145,143 @@ export const resolveTypeName = ({
   declaration,
   value,
   queryType,
+  operator,
 }: TypeDefinitionData): string | JSX.Element | (string | JSX.Element)[] => {
-  if (name) {
-    if (type === 'reference') {
-      if (typeArguments) {
-        if (name === 'Record' || name === 'React.ComponentProps') {
-          return (
-            <>
-              {name}&lt;
-              {typeArguments.map((type, index) => (
-                <span key={`record-type-${index}`}>
-                  {resolveTypeName(type)}
-                  {index !== typeArguments.length - 1 ? ', ' : null}
-                </span>
-              ))}
-              &gt;
-            </>
-          );
+  try {
+    if (name) {
+      if (type === 'reference') {
+        if (typeArguments) {
+          if (name === 'Record' || name === 'React.ComponentProps') {
+            return (
+              <>
+                {name}&lt;
+                {typeArguments.map((type, index) => (
+                  <span key={`record-type-${index}`}>
+                    {resolveTypeName(type)}
+                    {index !== typeArguments.length - 1 ? ', ' : null}
+                  </span>
+                ))}
+                &gt;
+              </>
+            );
+          } else {
+            return (
+              <>
+                {renderWithLink(name)}
+                &lt;
+                {typeArguments.map((type, index) => (
+                  <span key={`${name}-nested-type-${index}`}>
+                    {resolveTypeName(type)}
+                    {index !== typeArguments.length - 1 ? ', ' : null}
+                  </span>
+                ))}
+                &gt;
+              </>
+            );
+          }
         } else {
-          return (
-            <>
-              {renderWithLink(name)}
-              &lt;
-              {typeArguments.map((type, index) => (
-                <span key={`${name}-nested-type-${index}`}>
-                  {resolveTypeName(type)}
-                  {index !== typeArguments.length - 1 ? ', ' : null}
-                </span>
-              ))}
-              &gt;
-            </>
-          );
+          return renderWithLink(name);
         }
       } else {
-        return renderWithLink(name);
+        return name;
       }
-    } else {
-      return name;
-    }
-  } else if (elementType?.name) {
-    if (elementType.type === 'reference') {
-      return renderWithLink(elementType.name, type);
-    } else if (type === 'array') {
-      return elementType.name + '[]';
-    }
-    return elementType.name + type;
-  } else if (elementType?.declaration) {
-    if (type === 'array') {
-      const { parameters, type: paramType } = elementType.declaration.indexSignature || {};
-      if (parameters && paramType) {
-        return `{ [${listParams(parameters)}]: ${resolveTypeName(paramType)} }`;
+    } else if (elementType?.name) {
+      if (elementType.type === 'reference') {
+        return renderWithLink(elementType.name, type);
+      } else if (type === 'array') {
+        return elementType.name + '[]';
       }
-    }
-    return elementType.name + type;
-  } else if (type === 'union' && types?.length) {
-    return renderUnion(types);
-  } else if (elementType && elementType.type === 'union' && elementType?.types?.length) {
-    const unionTypes = elementType?.types || [];
-    return (
-      <>
-        ({renderUnion(unionTypes)}){type === 'array' && '[]'}
-      </>
-    );
-  } else if (declaration?.signatures) {
-    const baseSignature = declaration.signatures[0];
-    if (baseSignature?.parameters?.length) {
+      return elementType.name + type;
+    } else if (elementType?.declaration) {
+      if (type === 'array') {
+        const { parameters, type: paramType } = elementType.declaration.indexSignature || {};
+        if (parameters && paramType) {
+          return `{ [${listParams(parameters)}]: ${resolveTypeName(paramType)} }`;
+        }
+      }
+      return elementType.name + type;
+    } else if (type === 'union' && types?.length) {
+      return renderUnion(types);
+    } else if (elementType && elementType.type === 'union' && elementType?.types?.length) {
+      const unionTypes = elementType?.types || [];
       return (
         <>
-          (
-          {baseSignature.parameters?.map((param, index) => (
-            <span key={`param-${index}-${param.name}`}>
-              {param.name}: {resolveTypeName(param.type)}
-              {index + 1 !== baseSignature.parameters?.length && ', '}
+          ({renderUnion(unionTypes)}){type === 'array' && '[]'}
+        </>
+      );
+    } else if (declaration?.signatures) {
+      const baseSignature = declaration.signatures[0];
+      if (baseSignature?.parameters?.length) {
+        return (
+          <>
+            (
+            {baseSignature.parameters?.map((param, index) => (
+              <span key={`param-${index}-${param.name}`}>
+                {param.name}: {resolveTypeName(param.type)}
+                {index + 1 !== baseSignature.parameters?.length && ', '}
+              </span>
+            ))}
+            ) {'=>'} {resolveTypeName(baseSignature.type)}
+          </>
+        );
+      } else {
+        return (
+          <>
+            {'() =>'} {resolveTypeName(baseSignature.type)}
+          </>
+        );
+      }
+    } else if (type === 'reflection' && declaration?.children) {
+      return (
+        <>
+          {'{ '}
+          {declaration?.children.map((child: PropData, i) => (
+            <span key={`reflection-${name}-${i}`}>
+              {child.name + ': ' + resolveTypeName(child.type)}
+              {i + 1 !== declaration?.children?.length ? ', ' : null}
             </span>
           ))}
-          ) {'=>'} {resolveTypeName(baseSignature.type)}
+          {' }'}
         </>
       );
-    } else {
+    } else if (type === 'tuple' && elements) {
       return (
         <>
-          {'() =>'} {resolveTypeName(baseSignature.type)}
+          [
+          {elements.map((elem, i) => (
+            <span key={`tuple-${name}-${i}`}>
+              {resolveTypeName(elem)}
+              {i + 1 !== elements.length ? ', ' : null}
+            </span>
+          ))}
+          ]
         </>
       );
+    } else if (type === 'query' && queryType) {
+      return queryType.name;
+    } else if (type === 'literal' && typeof value === 'boolean') {
+      return `${value}`;
+    } else if (type === 'literal' && value) {
+      return `'${value}'`;
+    } else if (type === 'intersection' && types) {
+      return types
+        .filter(({ name }) => !omittableTypes.includes(name ?? ''))
+        .map((value, index, array) => (
+          <span key={`intersection-${name}-${index}`}>
+            {resolveTypeName(value)}
+            {index + 1 !== array.length && ' & '}
+          </span>
+        ));
+    } else if (type === 'typeOperator') {
+      return operator || 'undefined';
+    } else if (value === null) {
+      return 'null';
     }
-  } else if (type === 'reflection' && declaration?.children) {
-    return (
-      <>
-        {'{ '}
-        {declaration?.children.map((child: PropData, i) => (
-          <span key={`reflection-${name}-${i}`}>
-            {child.name + ': ' + resolveTypeName(child.type)}
-            {i + 1 !== declaration?.children?.length ? ', ' : null}
-          </span>
-        ))}
-        {' }'}
-      </>
-    );
-  } else if (type === 'tuple' && elements) {
-    return (
-      <>
-        [
-        {elements.map((elem, i) => (
-          <span key={`tuple-${name}-${i}`}>
-            {resolveTypeName(elem)}
-            {i + 1 !== elements.length ? ', ' : null}
-          </span>
-        ))}
-        ]
-      </>
-    );
-  } else if (type === 'query' && queryType) {
-    return queryType.name;
-  } else if (type === 'literal' && typeof value === 'boolean') {
-    return `${value}`;
-  } else if (type === 'literal' && value) {
-    return `'${value}'`;
-  } else if (value === null) {
-    return 'null';
+    return 'undefined';
+  } catch (e) {
+    console.warn('Type resolve has failed!', e);
+    return 'undefined';
   }
-  return 'undefined';
 };
 
 export const parseParamName = (name: string) => (name.startsWith('__') ? name.substr(2) : name);
@@ -293,6 +338,7 @@ export type CommentTextBlockProps = {
   components?: MDComponents;
   withDash?: boolean;
   beforeContent?: JSX.Element;
+  includePlatforms?: boolean;
 };
 
 export const parseCommentContent = (content?: string): string =>
@@ -304,13 +350,42 @@ export const getCommentOrSignatureComment = (
 ) => comment || (signatures && signatures[0]?.comment);
 
 export const getTagData = (tagName: string, comment?: CommentData) =>
-  comment?.tags?.filter(tag => tag.tag === tagName)[0];
+  getAllTagData(tagName, comment)?.[0];
+
+export const getAllTagData = (tagName: string, comment?: CommentData) =>
+  comment?.tags?.filter(tag => tag.tag === tagName);
+
+const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
+
+const formatPlatformName = (name: string) => {
+  const cleanName = name.toLowerCase().replace('\n', '');
+  return cleanName.includes('ios')
+    ? cleanName.replace('ios', 'iOS')
+    : cleanName.includes('expo')
+    ? cleanName.replace('expo', 'Expo Go')
+    : capitalize(name);
+};
+
+export const getPlatformTags = (comment?: CommentData, breakLine: boolean = true) => {
+  const platforms = getAllTagData('platform', comment);
+  return platforms?.length ? (
+    <>
+      {platforms.map(platform => (
+        <div key={platform.text} css={STYLES_PLATFORM}>
+          {formatPlatformName(platform.text)} Only
+        </div>
+      ))}
+      {breakLine && <br />}
+    </>
+  ) : null;
+};
 
 export const CommentTextBlock = ({
   comment,
   components = mdComponents,
   withDash,
   beforeContent,
+  includePlatforms = true,
 }: CommentTextBlockProps) => {
   const shortText = comment?.shortText?.trim().length ? (
     <ReactMarkdown components={components} remarkPlugins={[remarkGfm]}>
@@ -323,13 +398,13 @@ export const CommentTextBlock = ({
     </ReactMarkdown>
   ) : null;
 
-  const example = getTagData('example', comment);
-  const exampleText = example ? (
-    <>
+  const examples = getAllTagData('example', comment);
+  const exampleText = examples?.map((example, index) => (
+    <React.Fragment key={'Example-' + index}>
       <H4>Example</H4>
       <ReactMarkdown components={components}>{example.text}</ReactMarkdown>
-    </>
-  ) : null;
+    </React.Fragment>
+  ));
 
   const deprecation = getTagData('deprecated', comment);
   const deprecationNote = deprecation ? (
@@ -355,6 +430,7 @@ export const CommentTextBlock = ({
       {deprecationNote}
       {beforeContent}
       {withDash && (shortText || text) && ' - '}
+      {includePlatforms && getPlatformTags(comment, !withDash)}
       {shortText}
       {text}
       {seeText}
@@ -373,4 +449,16 @@ export const STYLES_SECONDARY = css`
   color: ${theme.text.secondary};
   font-size: 90%;
   font-weight: 600;
+`;
+
+export const STYLES_PLATFORM = css`
+  display: inline-block;
+  background-color: ${theme.background.tertiary};
+  color: ${theme.text.default};
+  font-size: 90%;
+  font-weight: 700;
+  padding: 6px 12px;
+  margin-bottom: 8px;
+  margin-right: 8px;
+  border-radius: 4px;
 `;

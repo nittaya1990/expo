@@ -1,8 +1,10 @@
 ---
 title: InAppPurchases
 sourceCodeUrl: 'https://github.com/expo/expo/tree/master/packages/expo-in-app-purchases'
+packageName: 'expo-in-app-purchases'
 ---
 
+import {APIInstallSection} from '~/components/plugins/InstallSection';
 import APISection from '~/components/plugins/APISection';
 import PlatformsSection from '~/components/plugins/PlatformsSection';
 
@@ -12,9 +14,11 @@ import PlatformsSection from '~/components/plugins/PlatformsSection';
 
 ## Installation
 
+<APIInstallSection hideBareInstructions />
+
 This module is currently only available in the [bare](../../../introduction/managed-vs-bare.md#bare-workflow) workflow.
 
-You must ensure that you have [installed and configured the `react-native-unimodules` package](https://github.com/expo/expo/tree/master/packages/react-native-unimodules) before continuing.
+You must ensure that you have [installed and configured Expo modules](/bare/installing-expo-modules.md) before continuing.
 
 ### Add the package to your dependencies
 

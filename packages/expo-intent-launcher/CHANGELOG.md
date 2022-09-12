@@ -8,7 +8,15 @@
 
 ### 🐛 Bug fixes
 
+- Re-enable passing custom action string to `startActivityAsync`. ([#15671](https://github.com/expo/expo/pull/15671) by [@Simek](https://github.com/Simek))
+
 ### 💡 Others
+
+## 10.1.0 — 2021-12-03
+
+### 💡 Others
+
+- Rewrite Android code to Kotlin. ([#14479](https://github.com/expo/expo/pull/14479) by [@kkafar](https://github.com/kkafar))
 
 ## 10.0.1 — 2021-10-01
 
@@ -59,4 +67,6 @@ _This version does not introduce any user-facing changes._
 ## 8.2.0 — 2020-05-27
 
 *This version does not introduce any user-facing changes.*
+```
+
 ```

@@ -155,4 +155,5 @@ export declare enum ResultCode {
  * @param params An object of intent parameters.
  * @return A promise which fulfils with `IntentLauncherResult` object.
  */
-export declare function startActivityAsync(activityAction: ActivityAction, params?: IntentLauncherParams): Promise<IntentLauncherResult>;
+export declare function startActivityAsync(activityAction: ActivityAction | string, params?: IntentLauncherParams): Promise<IntentLauncherResult>;
+//# sourceMappingURL=IntentLauncher.d.ts.map

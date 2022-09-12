@@ -24,7 +24,7 @@ export declare enum Orientation {
  * An enum whose values can be passed to the [`lockAsync`](#screenorientationlockasyncorientationlock)
  * method.
  * > __Note:__ `OrientationLock.ALL` and `OrientationLock.PORTRAIT` are invalid on devices which
- * don't support `OrientationLock.PORTRAIT_DOWN`.
+ * > don't support `OrientationLock.PORTRAIT_DOWN`.
  */
 export declare enum OrientationLock {
     /**
@@ -81,7 +81,7 @@ export declare enum SizeClassIOS {
 /**
  * An enum representing the lock policies that can be applied on the web platform, modelled after
  * the [W3C specification](https://w3c.github.io/screen-orientation/#dom-orientationlocktype).
- * These values can be applied through the [`lockPlatformAsync`](#screenorientationlockplatformasyncplatforminfo)
+ * These values can be applied through the [`lockPlatformAsync`](#screenorientationlockplatformasyncoptions)
  * method.
  */
 export declare enum WebOrientationLock {
@@ -103,17 +103,20 @@ export declare enum WebOrientation {
 }
 export declare type PlatformOrientationInfo = {
     /**
-     * __Android Only.__ A constant to set using the Android native [API](https://developer.android.com/reference/android/R.attr.html#screenOrientation).
+     * A constant to set using the Android native [API](https://developer.android.com/reference/android/R.attr.html#screenOrientation).
      * For example, in order to set the lock policy to [unspecified](https://developer.android.com/reference/android/content/pm/ActivityInfo.html#SCREEN_ORIENTATION_UNSPECIFIED),
      * `-1` should be passed in.
+     * @platform android
      */
     screenOrientationConstantAndroid?: number;
     /**
-     * __iOS Only.__ An array of orientations to allow on the iOS platform.
+     * An array of orientations to allow on the iOS platform.
+     * @platform ios
      */
     screenOrientationArrayIOS?: Orientation[];
     /**
-     * __Web Only.__ A web orientation lock to apply in the browser.
+     * A web orientation lock to apply in the browser.
+     * @platform web
      */
     screenOrientationLockWeb?: WebOrientationLock;
 };
@@ -123,13 +126,15 @@ export declare type ScreenOrientationInfo = {
      */
     orientation: Orientation;
     /**
-     *  __iOS Only.__ The [vertical size class](https://developer.apple.com/library/archive/featuredarticles/ViewControllerPGforiPhoneOS/TheAdaptiveModel.html)
+     * The [vertical size class](https://developer.apple.com/library/archive/featuredarticles/ViewControllerPGforiPhoneOS/TheAdaptiveModel.html)
      * of the device.
+     * @platform ios
      */
     verticalSizeClass?: SizeClassIOS;
     /**
-     *  __iOS Only.__ The [horizontal size class](https://developer.apple.com/library/archive/featuredarticles/ViewControllerPGforiPhoneOS/TheAdaptiveModel.html)
+     * The [horizontal size class](https://developer.apple.com/library/archive/featuredarticles/ViewControllerPGforiPhoneOS/TheAdaptiveModel.html)
      * of the device.
+     * @platform ios
      */
     horizontalSizeClass?: SizeClassIOS;
 };
@@ -144,3 +149,4 @@ export declare type OrientationChangeEvent = {
      */
     orientationInfo: ScreenOrientationInfo;
 };
+//# sourceMappingURL=ScreenOrientation.types.d.ts.map

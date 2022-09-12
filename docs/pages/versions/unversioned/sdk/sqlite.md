@@ -1,10 +1,11 @@
 ---
 title: SQLite
 sourceCodeUrl: 'https://github.com/expo/expo/tree/master/packages/expo-sqlite'
+packageName: 'expo-sqlite'
 ---
 
 import APISection from '~/components/plugins/APISection';
-import InstallSection from '~/components/plugins/InstallSection';
+import {APIInstallSection} from '~/components/plugins/InstallSection';
 import PlatformsSection from '~/components/plugins/PlatformsSection';
 
 **`expo-sqlite`** gives your app access to a database that can be queried through a [WebSQL](https://www.w3.org/TR/webdatabase/)-like API. The database is persisted across restarts of your app.
@@ -20,7 +21,7 @@ An [example to do list app](https://github.com/expo/examples/tree/master/with-sq
 In order to open a new SQLite database using an existing `.db` file you already have, you need to do three things:
 
 - `expo install expo-file-system expo-asset`
-- create a `metro.config.js` file in the root of your project with the following contents ([curious why? read here](../../../guides/customizing-metro.md#adding-more-file-extensions-to--assetexts)):
+- create a **metro.config.js** file in the root of your project with the following contents ([curious why? read here](../../../guides/customizing-metro.md#adding-more-file-extensions-to--assetexts)):
 
 ```ts
 const { getDefaultConfig } = require('expo/metro-config');
@@ -63,7 +64,7 @@ db.exec([{ sql: 'PRAGMA foreign_keys = ON;', args: [] }], false, () =>
 
 ## Installation
 
-<InstallSection packageName="expo-sqlite" />
+<APIInstallSection />
 
 ## API
 

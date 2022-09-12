@@ -11,12 +11,17 @@ require File.join(File.dirname(`node --print "require.resolve('@react-native-com
 require File.join(File.dirname(`node --print "require.resolve('expo/package.json')"`), "scripts/autolinking")
 
 require 'json'
-podfile_properties = JSON.parse(File.read('./podfile.properties.json')) rescue {}
+podfile_properties = JSON.parse(File.read('./Podfile.properties.json')) rescue {}
 
 abstract_target 'BareExpoMain' do
-  use_expo_modules!
-
   pod 'expo-dev-menu', path: '../../../packages/expo-dev-menu', :testspecs => ['Tests', 'UITests']
+
+  use_expo_modules!(
+    tests: [
+      'expo-dev-menu-interface',
+      'expo-dev-launcher',
+    ],
+  )
 
   config = use_native_modules!
 
@@ -25,12 +30,11 @@ abstract_target 'BareExpoMain' do
     :hermes_enabled => podfile_properties['expo.jsEngine'] == 'hermes'
   )
 
-  pod 'expo-dev-launcher', path: '../../../packages/expo-dev-launcher', :testspecs => ['Tests']
-
   # Fix Google Sign-in and Flipper
   post_install do |installer|
-    # `installer.pod_project` might be nil for `incremental_installation: true` and no new project generated
+    # `installer.pods_project` might be nil for `incremental_installation: true` and no new project generated
     react_native_post_install(installer) if installer.pods_project
+    __apply_Xcode_12_5_M1_post_install_workaround(installer) if installer.pods_project
 
     installer.target_installation_results.pod_target_installation_results.each do |pod_name, target_installation_result|
       target_installation_result.native_target.build_configurations.each do |config|
@@ -44,6 +48,14 @@ abstract_target 'BareExpoMain' do
           config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '12.0'
         end
       end
+    end
+  end
+
+  post_integrate do |installer|
+    begin
+      expo_patch_react_imports!(installer)
+    rescue => e
+      Pod::UI.warn e
     end
   end
 
@@ -64,5 +76,8 @@ abstract_target 'BareExpoMain' do
 
   target 'BareExpoTests' do
     inherit! :search_paths
+
+    pod 'Quick', :podspec => './../../../ios/Quick.podspec'
+    pod 'Nimble', :podspec => './../../../ios/Nimble.podspec'
   end
 end

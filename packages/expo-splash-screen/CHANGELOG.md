@@ -10,6 +10,34 @@
 
 ### 💡 Others
 
+- Updated `@expo/config-plugins` from `4.0.2` to `4.0.14` ([#15621](https://github.com/expo/expo/pull/15621) by [@EvanBacon](https://github.com/EvanBacon))
+
+## 0.14.1 — 2021-12-22
+
+### 🐛 Bug fixes
+
+- Remove duplicated `expo-modules-autolinking` package coming from `expo-splash-screen` dependencies. ([#15685](https://github.com/expo/expo/pull/15685) by [@kudo](https://github.com/kudo))
+
+## 0.14.0 — 2021-12-03
+
+### 🐛 Bug fixes
+
+- Fix `Cannot remove an observer <EXSplashScreenService> for the key path "rootViewController"` exception if applcation keyWindow changed. ([#14982](https://github.com/expo/expo/pull/14982) by [@kudo](https://github.com/kudo))
+
+## 0.13.4 — 2021-10-22
+
+_This version does not introduce any user-facing changes._
+
+## 0.13.3 — 2021-10-15
+
+### 🐛 Bug fixes
+
+- Fix `No native splash screen registered for given view controller` error happening when project is using both `expo-dev-client` and `expo-splash-screen` packages. ([#14745](https://github.com/expo/expo/pull/14745) by [@kudo](https://github.com/kudo))
+
+## 0.13.2 — 2021-10-15
+
+_This version does not introduce any user-facing changes._
+
 ## 0.13.1 — 2021-10-01
 
 ### 🐛 Bug fixes

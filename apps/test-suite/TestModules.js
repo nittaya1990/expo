@@ -130,7 +130,9 @@ export function getTestModules() {
     optionalRequire(() => require('./tests/AdMobInterstitial')),
     optionalRequire(() => require('./tests/AdMobRewarded')),
     optionalRequire(() => require('./tests/FBBannerAd')),
-    optionalRequire(() => require('./tests/Notifications'))
+    optionalRequire(() => require('./tests/Notifications')),
+    optionalRequire(() => require('./tests/NavigationBar')),
+    optionalRequire(() => require('./tests/SystemUI'))
   );
 
   if (!isDeviceFarm()) {
@@ -176,5 +178,7 @@ export function getTestModules() {
     modules.push(optionalRequire(() => require('./tests/Cellular')));
     modules.push(optionalRequire(() => require('./tests/BarCodeScanner')));
   }
-  return modules.filter(Boolean).sort((a, b) => a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1);
+  return modules
+    .filter(Boolean)
+    .sort((a, b) => (a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1));
 }

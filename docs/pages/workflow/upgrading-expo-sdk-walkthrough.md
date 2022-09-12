@@ -4,9 +4,17 @@ title: Upgrading Expo SDK
 
 If you are a couple of versions behind, upgrading your projects Expo SDK version can be difficult because of the amount of breaking changes and deprecations in each upgrade. Don't worry, here are all the breaking changes in each SDK version upgrade. We **strongly recommend** upgrading SDK versions incrementally if possible. Doing so will help you pinpoint breakages and issues that arise during the upgrade process.
 
-Expo maintains ~6 months of backwards compatibility. Once an SDK version has been deprecated, you will no longer be able to use the Expo Go app for development or build new binaries via `expo build`. You will still be able to publish OTA updates via `expo publish` however. Deprecations **will not** affect standalone apps you have in production.
+Expo maintains ~6 months of backwards compatibility. Once an SDK version has been deprecated, you will no longer be able to use the Expo Go app for development or build new binaries via `expo build`. You will still be able to publish updates via `expo publish`, and build using `eas build`, however. Deprecations **will not** affect standalone apps you have in production.
 
 > **Note**: If you are running ExpoKit inside a native project, upgrading will require extra steps. ExpoKit is deprecated and will no longer be supported after SDK 38. We recommend [migrating existing ExpoKit projects to the bare workflow](../bare/migrating-from-expokit.md).
+
+## SDK 44
+
+[Blog Post](https://blog.expo.dev/expo-sdk-44-4c4b8306584a)
+
+## SDK 43
+
+[Blog Post](https://blog.expo.dev/expo-sdk-43-aa9b3c7d5541)
 
 ## SDK 42
 
@@ -67,7 +75,7 @@ Expo maintains ~6 months of backwards compatibility. Once an SDK version has bee
 
 #### Upgrade from SDK 32
 
-- `app.json`, change `sdkVersion` to `"33.0.0"`,
+- **app.json**, change `sdkVersion` to `"33.0.0"`,
 - In package.json, change these dependencies:
 
 ```json
@@ -91,7 +99,7 @@ Expo maintains ~6 months of backwards compatibility. Once an SDK version has bee
 
 #### Upgrade from SDK 31
 
-- `app.json`, change `sdkVersion` to `"32.0.0"`,
+- **app.json**, change `sdkVersion` to `"32.0.0"`,
 - In package.json, change these dependencies:
 
 ```json
@@ -102,10 +110,10 @@ Expo maintains ~6 months of backwards compatibility. Once an SDK version has bee
 }
 ```
 
-- If using the default `.babelrc`, change it to `babel.config.js`:
+- If using the default `.babelrc`, change it to **babel.config.js**:
 
 ```javascript
-module.exports = function(api) {
+module.exports = function (api) {
   api.cache(true);
   return {
     presets: ['babel-preset-expo'],
@@ -125,7 +133,7 @@ module.exports = function(api) {
 
 #### Upgrade from SDK 30
 
-- `app.json`, change `sdkVersion` to `"31.0.0"`,
+- **app.json**, change `sdkVersion` to `"31.0.0"`,
 - In package.json, change these dependencies:
 
 ```json
@@ -148,7 +156,7 @@ module.exports = function(api) {
 
 #### Upgrade from SDK 29
 
-- `app.json`, change `sdkVersion` to `"30.0.0"`,
+- **app.json**, change `sdkVersion` to `"30.0.0"`,
 - In package.json, change these dependencies:
 
 ```json
@@ -171,7 +179,7 @@ module.exports = function(api) {
 
 #### Upgrade from SDK 28
 
-- `app.json`, change `sdkVersion` to `"29.0.0"`,
+- **app.json**, change `sdkVersion` to `"29.0.0"`,
 - In package.json, change these dependencies:
 
 ```json
@@ -194,7 +202,7 @@ module.exports = function(api) {
 
 #### Upgrade from SDK 27
 
-- `app.json`, change `sdkVersion` to `"28.0.0"`,
+- **app.json**, change `sdkVersion` to `"28.0.0"`,
 - In package.json, change these dependencies:
 
 ```json
@@ -388,7 +396,7 @@ The following APIs have been removed after being deprecated for a minimum of 2 r
 
 Metro Bundler (the default React Native bundler) now errors (instead of silently ignoring) dynamic requires. In particular this breaks an older version of moment.js if you were using that (or indirectly depending on it).
 
-- This is a known issue with Metro [which is being tracked on the project’s Github issues](https://github.com/facebook/metro-bundler/issues/65).
+- This is a known issue with Metro [which is being tracked on the project’s GitHub issues](https://github.com/facebook/metro-bundler/issues/65).
 - If you use moment.js in your app, [you may have success with this fix](https://github.com/facebook/metro-bundler/issues/65#issuecomment-336838866).
 
 Several deprecated APIs have been removed. All of these APIs printed warning messages in previous releases:

@@ -4,11 +4,23 @@
 
 ### 🛠 Breaking changes
 
+- Guess the device language on iOS rather than using the app-specific language. ([#15807](https://github.com/expo/expo/pull/15807) by [@EvanBacon](https://github.com/EvanBacon))
+
 ### 🎉 New features
 
 ### 🐛 Bug fixes
 
 ### 💡 Others
+
+## 12.0.0 — 2021-12-03
+
+### 🎉 New features
+
+- Native module on iOS is now written in Swift using the new API. ([#15266](https://github.com/expo/expo/pull/15266) by [@tsapeta](https://github.com/tsapeta))
+
+### 💡 Others
+
+- Rewrite module to Kotlin. ([#14588](https://github.com/expo/expo/pull/14588) by [@mstach60161](https://github.com/mstach60161))
 
 ## 11.0.0 — 2021-09-28
 

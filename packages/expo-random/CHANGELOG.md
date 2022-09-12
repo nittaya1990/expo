@@ -6,9 +6,25 @@
 
 ### 🎉 New features
 
+- The module on iOS is now written in Swift and uses JSI host object instead of the bridge module for communication between JavaScript and native code. ([#15875](https://github.com/expo/expo/pull/15875) by [@tsapeta](https://github.com/tsapeta))
+
 ### 🐛 Bug fixes
 
 ### 💡 Others
+
+## 12.1.1 — 2021-12-18
+
+### 🐛 Bug fixes
+
+- Fix iOS project build break on SDK 44. ([#15626](https://github.com/expo/expo/pull/15626) by [@kudo](https://github.com/kudo))
+
+## 12.1.0 — 2021-12-03
+
+_This version does not introduce any user-facing changes._
+
+## 12.0.1 — 2021-10-27
+
+_This version does not introduce any user-facing changes._
 
 ## 12.0.0 — 2021-09-28
 

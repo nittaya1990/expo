@@ -4,8 +4,10 @@ import { InlineCode } from '~/components/base/code';
 import { B, P } from '~/components/base/paragraph';
 import { H2, H3Code } from '~/components/plugins/Headings';
 import {
+  CommentData,
   GeneratedData,
-  MethodDefinitionData,
+  MethodSignatureData,
+  PropData,
   PropsDefinitionData,
 } from '~/components/plugins/api/APIDataTypes';
 import APISectionProps from '~/components/plugins/api/APISectionProps';
@@ -16,14 +18,17 @@ export type APISectionComponentsProps = {
   componentsProps: PropsDefinitionData[];
 };
 
-const getComponentName = (name?: string, children: MethodDefinitionData[] = []) => {
+const getComponentName = (name?: string, children: PropData[] = []) => {
   if (name && name !== 'default') return name;
-  const ctor = children.filter((child: MethodDefinitionData) => child.name === 'constructor')[0];
-  return ctor.signatures[0]?.type?.name || 'default';
+  const ctor = children.filter((child: PropData) => child.name === 'constructor')[0];
+  return ctor?.signatures?.[0]?.type?.name ?? 'default';
 };
 
+const getComponentComment = (comment: CommentData, signatures: MethodSignatureData[]) =>
+  comment || (signatures?.[0]?.comment ?? undefined);
+
 const renderComponent = (
-  { name, comment, type, extendedTypes, children }: GeneratedData,
+  { name, comment, type, extendedTypes, children, signatures }: GeneratedData,
   componentsProps?: PropsDefinitionData[]
 ): JSX.Element => {
   const resolvedType = extendedTypes?.length ? extendedTypes[0] : type;
@@ -38,7 +43,7 @@ const renderComponent = (
           <B>Type:</B> <InlineCode>{resolveTypeName(resolvedType)}</InlineCode>
         </P>
       )}
-      <CommentTextBlock comment={comment} />
+      <CommentTextBlock comment={getComponentComment(comment, signatures)} />
       {componentsProps && componentsProps.length ? (
         <APISectionProps data={componentsProps} header={`${resolvedName}Props`} />
       ) : null}

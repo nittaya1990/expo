@@ -13,6 +13,171 @@ Package-specific changes not released in any SDK will be added here just before 
 
 ### 🐛 Bug fixes
 
+## 44.0.0 — 2021-12-03
+
+### 📚 3rd party library updates
+
+- Updated `react-native-webview` from `11.13.0` to `11.15.0`. ([#15330](https://github.com/expo/expo/pull/15330) by [@tsapeta](https://github.com/tsapeta))
+- Updated `react-native-shared-element` from `0.8.2` to `0.8.3`. ([#15338](https://github.com/expo/expo/pull/15338) by [@kudo](https://github.com/kudo))
+- Updated `lottie-react-native` from `4.0.3` to `5.0.1`. ([#15345](https://github.com/expo/expo/pull/15345) by [@kudo](https://github.com/kudo))
+- Updated `@react-native-community/slider` from `4.1.4` to `4.1.12`. ([#15356](https://github.com/expo/expo/pull/15356) by [@EvanBacon](https://github.com/EvanBacon))
+- Updated `@react-native-community/datetimepicker` from `3.5.2` to `4.0.0`. ([#15357](https://github.com/expo/expo/pull/15357) by [@EvanBacon](https://github.com/EvanBacon))
+- Updated `@react-native-community/netinfo` from `6.0.2` to `7.1.3`. ([#15352](https://github.com/expo/expo/pull/15352) by [@kudo](https://github.com/kudo))
+- Updated `@react-native-masked-view/masked-view` from `0.2.5` to `0.2.6`. ([#15362](https://github.com/expo/expo/pull/15362) by [@brentvatne](https://github.com/brentvatne))
+- Updated `react-native-maps` from `0.28.1` to `0.29.4`. ([#15397](https://github.com/expo/expo/pull/15397) by [@bbarthec](https://github.com/bbarthec))
+- Updated `react-native-pager-view` from `5.4.6` to `5.4.9`. ([#15348](https://github.com/expo/expo/pull/15348) by [@brentvatne](https://github.com/brentvatne))
+- Updated `@stripe/stripe-react-native` from `0.2.2` to `0.2.3`. ([#15396](https://github.com/expo/expo/pull/15396) by [@brentvatne](https://github.com/brentvatne) and [@kudo](https://github.com/kudo))
+- Updated `react-native-gesture-handler` from `1.10.3` to `2.1.0`. ([#15404](https://github.com/expo/expo/pull/15404) & [#15568](https://github.com/expo/expo/pull/15568) by [@kudo](https://github.com/kudo))
+- Updated `react-native-screens` from `3.8.0` to `3.10.1`. ([#15416](https://github.com/expo/expo/pull/15416) by [@bbarthec](https://github.com/bbarthec))
+- Updated `react-native-reanimated` from `2.2.3` to `2.3.1`. ([#15475](https://github.com/expo/expo/pull/15475) & [#15574](https://github.com/expo/expo/pull/15574) by [@Kudo](https://github.com/Kudo))
+
+### 🛠 Breaking changes
+
+- **`expo-ads-admob`**
+  - Remove deprecated `setTestDeviceID` method. ([#15091](https://github.com/expo/expo/pull/15091) by [@Simek](https://github.com/Simek))
+- **`expo-blur`**
+  - On iOS replaced non-working `alpha`-based blur mechanism with a new one basing on `UIViewPropertyAnimator`. ([#14946](https://github.com/expo/expo/pull/14946) by [@bbarthec](https://github.com/bbarthec))
+  - Renamed `BlurProps` to `BlurViewProps` to align with React Native's types naming convention. ([#14946](https://github.com/expo/expo/pull/14946) by [@bbarthec](https://github.com/bbarthec))
+- **`expo-constants`**
+  - Deprecated `Constants.deviceYearClass`, moved to `expo-device` - `Device.deviceYearClass` ([#14691](https://github.com/expo/expo/pull/14691) by [@EvanBacon](https://github.com/EvanBacon))
+  - Deprecated `Constants.platform.ios.model`, moved to `expo-device` - `Device.modelName` ([#14691](https://github.com/expo/expo/pull/14691) by [@EvanBacon](https://github.com/EvanBacon))
+  - Remove deprecated `Constants.deviceId`. ([#15280](https://github.com/expo/expo/pull/15280) by [@Simek](https://github.com/Simek))
+  - Remove legacy `Constants.linkingUrl` alias. ([#15280](https://github.com/expo/expo/pull/15280) by [@Simek](https://github.com/Simek))
+- **`expo-device`**
+  - Changed naming format of `modelName` to be more consistent ([#14670](https://github.com/expo/expo/pull/14670) by [@EvanBacon](https://github.com/EvanBacon))
+- **`expo-firebase-analytics`**
+  - Deprecates `setCurrentScreen` and removes the native API calls to support the latest Firebase SDKs. ([#14366](https://github.com/expo/expo/pull/14366) by [@IjzerenHein](https://github.com/IjzerenHein))
+- **`expo-image-picker`**
+  - Remove typo workaround for `getMediaLibaryPermissionsAsync` method. ([#14646](https://github.com/expo/expo/pull/14646) by [@Simek](https://github.com/Simek))
+- **`expo-linking`**
+  - Remove deprecated `useUrl` method. ([#15226](https://github.com/expo/expo/pull/15226) by [@Simek](https://github.com/Simek))
+- **`expo-location`**
+  - Remove deprecated `setApiKey` method. ([#14672](https://github.com/expo/expo/pull/14672) by [@Simek](https://github.com/Simek))
+
+### 🎉 New features
+
+- **`expo-constants`**
+  - Added support for iOS 15.0 devices ([#14640](https://github.com/expo/expo/pull/14640) by [@EvanBacon](https://github.com/EvanBacon))
+- **`expo-device`**
+  - Added support for iOS 15.0 devices ([#14640](https://github.com/expo/expo/pull/14640) by [@EvanBacon](https://github.com/EvanBacon))
+  - Moved `modelName` implementation to native ([#14670](https://github.com/expo/expo/pull/14670) by [@EvanBacon](https://github.com/EvanBacon))
+- **`expo-document-picker`**
+  - [plugin] Added `iCloudContainerEnvironment` prop for setting the `com.apple.developer.icloud-container-environment` entitlement ([#14885](https://github.com/expo/expo/pull/14885) by [@EvanBacon](https://github.com/EvanBacon))
+- **`expo-firebase-analytics`**
+  - Add support for `setSessionTimeoutDuration` on iOS. ([#14364](https://github.com/expo/expo/pull/14364) by [@IjzerenHein](https://github.com/IjzerenHein))
+- **`expo-firebase-core`**
+  - [iOS] Firebase native app will automatically be initialized without any extra native changes ([#14750](https://github.com/expo/expo/pull/14750) by [@EvanBacon](https://github.com/EvanBacon))
+- **`expo-gl`**
+  - Add support for reanimated worklets. ([#15296](https://github.com/expo/expo/pull/15296) by [@wkozyra95](https://github.com/wkozyra95))
+- **`expo-localization`**
+  - Native module on iOS is now written in Swift using the new API. ([#15266](https://github.com/expo/expo/pull/15266) by [@tsapeta](https://github.com/tsapeta))
+- **`expo-location`**
+  - Added steetNumber to `reverseGeocodeAsync` for iOS ([#13556](https://github.com/expo/expo/pull/13556) by [@chrisdrackett](https://github.com/chrisdrackett))
+- **`expo-sqlite`**
+  - Removed lodash. ([#12523](https://github.com/expo/expo/pull/12523) by [@EvanBacon](https://github.com/EvanBacon))
+
+### 🐛 Bug fixes
+
+- **`expo-analytics-amplitude`**
+  - Fixed `setUserIdAsync` throwing error on Android when `null` is passed. ([#15028](https://github.com/expo/expo/pull/15028) by [@tsapeta](https://github.com/tsapeta))
+- **`expo-av`**
+  - Fix require cycles ([#14820](https://github.com/expo/expo/pull/14820) by [@EvanBacon](https://github.com/EvanBacon))
+  - On Web, do not try to attach fullscreen listener, when component `ref` is `null`. ([#14713](https://github.com/expo/expo/pull/14713) by [@Simek](https://github.com/Simek))
+- **`expo-barcode-scanner`**
+  - Fixed `BarCodeScanner` only scans on the first mount on Android. ([#15393](https://github.com/expo/expo/pull/15393) by [@lukmccall](https://github.com/lukmccall))
+  - Fixed crashes caused by the Zxing scanner on Android. ([#15394](https://github.com/expo/expo/pull/15394) by [@lukmccall](https://github.com/lukmccall))
+- **`expo-blur`**
+  - On iOS fixed `intensity` property not blurring text content properly. ([#14946](https://github.com/expo/expo/pull/14946) by [@bbarthec](https://github.com/bbarthec))
+- **`expo-calendar`**
+  - [Android] Fix `allowModifications` always return false in calendar object. ([#15307](https://github.com/expo/expo/pull/15307) by [@jekiwijaya](https://github.com/jekiwijaya))
+- **`expo-camera`**
+  - Fix Gradle error when running Gradle from outside of the project directory. ([#15109](https://github.com/expo/expo/pull/15109) by [@kudo](https://github.com/kudo))
+- **`expo-asset`**
+  - Fix `fromModule` on restrictive (Snack) web environments.  ([#14435](https://github.com/expo/expo/pull/14435) by [@IjzerenHein](https://github.com/IjzerenHein))
+- **`expo-constants`**
+  - Don't include fonts from family "System Font" (introduced by iOS 15) ([#14577](https://github.com/expo/expo/pull/14577) by [@brentvatne](https://github.com/brentvatne))
+  - Fix `Constants.deviceId has been deprecated in favor of generating and storing your own ID.` warnings in classic react-native projects. ([#14837](https://github.com/expo/expo/pull/14837) by [@kudo](https://github.com/kudo))
+  - Fix NODE_BINARY not found build error when using nvm via zsh ([#14895](https://github.com/expo/expo/pull/14895) by [@filipengberg](https://github.com/filipengberg))
+- **`expo-firebase-core`**
+  - Fix crash on launch in iOS classic builds where `GoogleService-Info.plist` is not configured. ([#14811](https://github.com/expo/expo/pull/14811) by [@kudo](https://github.com/kudo))
+- **`expo-file-system`**
+  - Fixed `uploadAsync` failing to resolve when using `BINARY_CONTENT`. ([#14764](https://github.com/expo/expo/pull/14764) by [@cruzach](https://github.com/cruzach))
+  - Fix `okio` library build error for `react-native@0.65` or above. ([#14761](https://github.com/expo/expo/pull/14761) by [@kudo](https://github.com/kudo))
+- **`expo-image-picker`**
+  - On Web add missing `cancelled` property to the return values of `launchCameraAsync` and `launchImageLibraryAsync` methods. ([#14646](https://github.com/expo/expo/pull/14646) by [@Simek](https://github.com/Simek))
+- **`expo-image-manipulator`**
+  - Fix `Tainted canvases may not be exported` CORS error on web. ([#14739](https://github.com/expo/expo/pull/14739) by [@IjzerenHein](https://github.com/IjzerenHein))
+- **`expo-location`**
+  - Call `jobService.jobFinished` for the finished geofencing jobs. ([#14786](https://github.com/expo/expo/pull/14786) by [@mdmitry01](https://github.com/mdmitry01))
+  - Check for null value of `mLocationClient` to prevent a crash ([#15023](https://github.com/expo/expo/pull/15023) by [@zakharchenkoAndrii](https://github.com/zakharchenkoAndrii))
+- **`expo-print`**
+  - Fix page-breaks and margins not supported on iOS ([#14383](https://github.com/expo/expo/pull/14802) by [@cruzach](https://github.com/IjzerenHein)) ([#14802](https://github.com/expo/expo/pull/14802) by [@IjzerenHein](https://github.com/IjzerenHein))
+- **`expo-sensors`**
+  - Fix Android crash caused by `assertSubscriptionAlive` method ([#14720](https://github.com/expo/expo/pull/14720) by [@zakharchenkoAndrii](https://github.com/zakharchenkoAndrii))
+
+### 💡 Others
+
+- **`expo-ads-facebook`**
+  - Update `nullthrows` dependency. ([#15069](https://github.com/expo/expo/pull/15069) by [@Simek](https://github.com/Simek))
+- **`expo-app-auth`**
+  - Added deprecation notice for module. ([#15293](https://github.com/expo/expo/pull/15293) by [@EvanBacon](https://github.com/EvanBacon))
+- **`expo-av`**
+  - Update component types and event types. ([#14713](https://github.com/expo/expo/pull/14713) by [@Simek](https://github.com/Simek))
+  - Mark `status` as an optional field in `VideoFullscreenUpdateEvent` and `VideoReadyForDisplayEvent` types, becouse Web implementation do not return `status` in those events. ([#14713](https://github.com/expo/expo/pull/14713) by [@Simek](https://github.com/Simek))
+- **`expo-calendar`**
+  - Replace custom `OptionalKeys` type wrapper with embedded in TypeScript `Partial`. ([#15192](https://github.com/expo/expo/pull/15192) by [@Simek](https://github.com/Simek))
+  - Extract nested object in current types to new, separate types: `AlarmLocation` and `DaysOfTheWeek`. ([#15192](https://github.com/expo/expo/pull/15192) by [@Simek](https://github.com/Simek))
+- **`expo-camera`**
+  - Rewrite module to Kotlin. ([#14717](https://github.com/expo/expo/pull/14717) by [@mstach60161](https://github.com/mstach60161))
+  - [plugin] Use more specific gradle variable name. ([#14966](https://github.com/expo/expo/pull/14966) by [@EvanBacon](https://github.com/EvanBacon))
+- **`expo-cellular`**
+  - Removed legacy Objective-C implementation and changed the pod name to `ExpoCellular`. ([#15082](https://github.com/expo/expo/pull/15082) by [@tsapeta](https://github.com/tsapeta))
+- **`expo-constants`**
+  - Extract nested objects from current types to new, separate types - `ExpoGoPackagerOpts` and `ManifestExtra`. ([#15113](https://github.com/expo/expo/pull/15113) by [@Simek](https://github.com/Simek))
+  - Add missing `null` to the `Constants.buildNumber` type. ([#15280](https://github.com/expo/expo/pull/15280) by [@Simek](https://github.com/Simek))
+- **`expo-facebook`**
+  - Rewritten module to Kotlin. ([#14572](https://github.com/expo/expo/pull/14572) by [@mstach60161](https://github.com/mstach60161))
+- **`expo-face-detector`**
+  - Rewritten module to Kotlin. ([#14943](https://github.com/expo/expo/pull/14943) by [@mstach60161](https://github.com/mstach60161))
+- **`expo-firebase-core`**
+  - [plugin] Native regular expressions have been removed in favor Expo modules AppDelegate proxy ([#14750](https://github.com/expo/expo/pull/14750) by [@EvanBacon](https://github.com/EvanBacon))
+- **`expo-haptics`**
+  - Removed legacy Objective-C implementation and changed the pod name to `ExpoHaptics`. ([#15083](https://github.com/expo/expo/pull/15083) by [@tsapeta](https://github.com/tsapeta))
+  - Simplified iOS implementation with enums as argument types. ([#15129](https://github.com/expo/expo/pull/15129) by [@tsapeta](https://github.com/tsapeta))
+- **`expo-google-app-auth`**
+  - Added deprecation notice for module. ([#15294](https://github.com/expo/expo/pull/15294) by [@EvanBacon](https://github.com/EvanBacon))
+- **`expo-google-sign-in`**
+  - Added deprecation notice for module. ([#15295](https://github.com/expo/expo/pull/15295) by [@EvanBacon](https://github.com/EvanBacon))
+- **`expo-image-picker`**
+  - Export missing types: `ImageInfo`, `ImagePickerMultipleResult`, `OpenFileBrowserOptions`, `ExpandImagePickerResult`, `UIImagePickerControllerQualityType` and `UIImagePickerPresentationStyle`. ([#14646](https://github.com/expo/expo/pull/14646) by [@Simek](https://github.com/Simek))
+  - Extract return object containing `{ cancelled: true }` to separate type `ImagePickerCancelledResult` for `launchCameraAsync` and `launchImageLibraryAsync` methods. ([#14646](https://github.com/expo/expo/pull/14646) by [@Simek](https://github.com/Simek))
+- **`expo-intent-launcher`**
+  - Rewrite Android code to Kotlin. ([#14479](https://github.com/expo/expo/pull/14479) by [@kkafar](https://github.com/kkafar))
+- **`expo-linear-gradient`**
+  - Rewrote code to Swift, removed legacy Objective-C module implementation and changed the pod name to `ExpoLinearGradient`. ([#15168](https://github.com/expo/expo/pull/15168) by [@tsapeta](https://github.com/tsapeta))
+  - Rewrote module using Sweet API on Android. ([#15166](https://github.com/expo/expo/pull/15166) by [@lukmccall](https://github.com/lukmccall))
+- **`expo-linking`**
+  - Update `qs` dependency. ([#15069](https://github.com/expo/expo/pull/15069) by [@Simek](https://github.com/Simek))
+  - Extract `sendIntent` method `extras` parameter to the separate type named `SendIntentExtras`. ([#15226](https://github.com/expo/expo/pull/15226) by [@Simek](https://github.com/Simek))
+- **`expo-localization`**
+  - Rewrite module to Kotlin. ([#14588](https://github.com/expo/expo/pull/14588) by [@mstach60161](https://github.com/mstach60161))
+- **`expo-location`**
+  - Extract nested `foregroundService` object from `LocationTaskOptions` type to the separate type `LocationTaskServiceOptions`. ([#14672](https://github.com/expo/expo/pull/14672) by [@Simek](https://github.com/Simek))
+- **`expo-media-library`**
+  - Rewritten Android module to Kotlin. ([#14562](https://github.com/expo/expo/pull/14562), [#14563](https://github.com/expo/expo/pull/14563), [#14564](https://github.com/expo/expo/pull/14564), [#14565](https://github.com/expo/expo/pull/14565), [#14566](https://github.com/expo/expo/pull/14566) by [@barthap](https://github.com/barthap))
+- **`expo-notifications`**
+  - Update `fs-extra` dependency. ([#15069](https://github.com/expo/expo/pull/15069) by [@Simek](https://github.com/Simek))
+- **`expo-screen-orientation`**
+  - [plugin] Added SDK 43 tests for new AppDelegate template ([#14763](https://github.com/expo/expo/pull/14763) by [@EvanBacon](https://github.com/EvanBacon))
+  - The app delegate subscriber on iOS has been separated from the singleton module to hook into the new implementation of `ExpoAppDelegate`. ([#14867](https://github.com/expo/expo/pull/14867) by [@tsapeta](https://github.com/tsapeta))
+- **`expo-sqlite`**
+  - Update `lodash` dependency. ([#15069](https://github.com/expo/expo/pull/15069) by [@Simek](https://github.com/Simek))
+
+### ⚠️ Notices
+
+- **`expo-screen-orientation`**
+  - Extra setup on iOS bare projects is not necessary from the support of `ExpoReactDelegateHandler`. ([#15140](https://github.com/expo/expo/pull/15140) by [@kudo](https://github.com/kudo))
+
 ## 43.0.0 — 2021-10-01
 
 ### 📚 3rd party library updates
@@ -21,15 +186,17 @@ Package-specific changes not released in any SDK will be added here just before 
 - Updated `firebase` from `8.2.3` to `8.10.0`. ([#14259](https://github.com/expo/expo/pull/14259) by [@IjzerenHein](https://github.com/IjzerenHein))
 - Updated `@react-native-community/netinfo` from `6.0.0` to `6.0.2`. ([#14329](https://github.com/expo/expo/pull/14329) by [@cruzach](https://github.com/cruzach))
 - Updated `react-native-webview` from `11.6.2` to `11.13.0`. ([#14301](https://github.com/expo/expo/pull/14301) by [@kudo](https://github.com/kudo))
-- Updated `react-native-lottie` from `4.0.2` to `4.0.3`. ([#14331](https://github.com/expo/expo/pull/14331) by [@cruzach](https://github.com/cruzach))
+- Updated `lottie-react-native` from `4.0.2` to `4.0.3`. ([#14331](https://github.com/expo/expo/pull/14331) by [@cruzach](https://github.com/cruzach))
 - Updated `@stripe/stripe-react-native` from `0.1.4` to `0.2.2`. ([#14357](https://github.com/expo/expo/pull/14357) & [#14452](https://github.com/expo/expo/pull/14452) by [@cruzach](https://github.com/cruzach))
 - Updated `react-native-safe-area-context` from `3.2.0` to `3.3.2`. ([#14303](https://github.com/expo/expo/pull/14303) by [@kudo](https://github.com/kudo))
-- Updated `@react-native-community/viewpager` from `5.0.11` to `react-native-pager-view@5.4.4`. ([#14348](https://github.com/expo/expo/pull/14348) by [@cruzach](https://github.com/cruzach))
+- Updated `@react-native-community/viewpager` from `5.0.11` to `react-native-pager-view@5.4.6`. ([#14348](https://github.com/expo/expo/pull/14348) by [@cruzach](https://github.com/cruzach)) ([#14657](https://github.com/expo/expo/pull/14657) by [@kudo](https://github.com/kudo))
 - Updated `@react-native-picker/picker` from `1.6.7` to `2.1.0`. ([#14358](https://github.com/expo/expo/pull/14358) by [@ajsmth](https://github.com/ajsmth))
 - Updated `react-native-screens` from `3.4.0` to `3.8.0`. ([#14330](https://github.com/expo/expo/pull/14330) by [@cruzach](https://github.com/cruzach)) ([#14544](https://github.com/expo/expo/pull/14544) by [@kudo](https://github.com/kudo))
 
 ### 🛠 Breaking changes
 
+- Updated `@expo/config-plugins` ([#14798](https://github.com/expo/expo/pull/14798) by [@jkhales](https://github.com/jkhales))
+- Updated `@expo/config-types` ([#14798](https://github.com/expo/expo/pull/14798) by [@jkhales](https://github.com/jkhales))
 - Removed `expo-payments-stripe`. Please use `@stripe/stripe-react-native` instead. ([#14382](https://github.com/expo/expo/pull/14382) by [@cruzach](https://github.com/cruzach))
 - Updated firebase to version 9.0.2, including support for compat libraries and new modular style. ([#14616](https://github.com/expo/expo/pull/14616) by [@sebastianwilczek](https://github.com/sebastianwilczek))
 - `navigator.geolocation` is no longer defined automatically as a side effect of the `expo` package. It previously provided a warning that you needed to install `expo-location`. ([#14441](https://github.com/expo/expo/pull/14441) by [@brentvatne](https://github.com/brentvatne)
@@ -198,7 +365,7 @@ Package-specific changes not released in any SDK will be added here just before 
   - Add Audio `usePermissions` hook from modules factory. ([#13851](https://github.com/expo/expo/pull/13851) by [@bycedric](https://github.com/bycedric))
   - On iOS, add Audio metadata (title) updates via `setOnMetadataUpdate`. ([#14134](https://github.com/expo/expo/pull/14134) by [@dani-mp](https://github.com/dani-mp))
 - **`expo-asset`**
-  - Reapply [#12624](https://github.com/expo/expo/pull/12624)  ([#13789](https://github.com/expo/expo/pull/13789) by [@jkhales](https://github.com/jkhales)) ([#12624](https://github.com/expo/expo/pull/12624), [#13789](https://github.com/expo/expo/pull/13789) by [@jkhales](https://github.com/jkhales))
+  - Reapply [#12624](https://github.com/expo/expo/pull/12624) ([#13789](https://github.com/expo/expo/pull/13789) by [@jkhales](https://github.com/jkhales)) ([#12624](https://github.com/expo/expo/pull/12624), [#13789](https://github.com/expo/expo/pull/13789) by [@jkhales](https://github.com/jkhales))
 - **`expo-background-fetch`**
   - Use stable manifest ID where applicable. ([#12964](https://github.com/expo/expo/pull/12964) by [@wschurman](https://github.com/wschurman))
 - **`expo-auth-session`**
@@ -779,7 +946,7 @@ Package-specific changes not released in any SDK will be added here just before 
   - Enable kotlin in all modules. ([#12716](https://github.com/expo/expo/pull/12716) by [@wschurman](https://github.com/wschurman)) ([#12716](https://github.com/expo/expo/pull/12716) by [@wschurman](https://github.com/wschurman))
 - **`expo-barcode-scanner`**
   - Enable kotlin in all modules. ([#12716](https://github.com/expo/expo/pull/12716) by [@wschurman](https://github.com/wschurman)) ([#12716](https://github.com/expo/expo/pull/12716) by [@wschurman](https://github.com/wschurman))
-  - On iOS removed the requirement for the presence of `NSMicrophoneUsageDescription` key in `Info.plist` ([#12860](https://github.com/expo/expo/pull/12772) by [@ajsmth](https://github.com/ajsmth)) ([#12772](https://github.com/expo/expo/pull/12772) by [@ajsmth](https://github.com/ajsmth))
+  - On iOS removed the requirement for the presence of `NSMicrophoneUsageDescription` key in `Info.plist` ([#12860](https://github.com/expo/expo/pull/12860) by [@ajsmth](https://github.com/ajsmth)) ([#12772](https://github.com/expo/expo/pull/12772) by [@ajsmth](https://github.com/ajsmth))
 - **`expo-branch`**
   - Enable kotlin in all modules. ([#12716](https://github.com/expo/expo/pull/12716) by [@wschurman](https://github.com/wschurman)) ([#12716](https://github.com/expo/expo/pull/12716) by [@wschurman](https://github.com/wschurman))
 - **`expo-brightness`**

@@ -10,6 +10,7 @@ import com.facebook.react.uimanager.ViewManager
 import expo.modules.adapters.react.ReactModuleRegistryProvider
 import expo.modules.core.interfaces.Package
 import expo.modules.core.interfaces.SingletonModule
+import expo.modules.kotlin.ModulesProvider
 import expo.modules.random.RandomModule
 import expo.modules.manifests.core.Manifest
 import host.exp.exponent.Constants
@@ -43,7 +44,6 @@ import versioned.host.exp.exponent.modules.api.components.webview.RNCWebViewModu
 import versioned.host.exp.exponent.modules.api.components.webview.RNCWebViewPackage
 import versioned.host.exp.exponent.modules.api.netinfo.NetInfoModule
 import versioned.host.exp.exponent.modules.api.notifications.NotificationsModule
-import versioned.host.exp.exponent.modules.api.reanimated.ReanimatedModule
 import versioned.host.exp.exponent.modules.api.safeareacontext.SafeAreaContextPackage
 import versioned.host.exp.exponent.modules.api.screens.RNScreensPackage
 import versioned.host.exp.exponent.modules.api.viewshot.RNViewShotModule
@@ -98,7 +98,7 @@ class ExponentPackage : ReactPackage {
       registryAdapter = delegate.getScopedModuleRegistryAdapterForPackages(packages, singletonModules)
     }
     if (registryAdapter == null) {
-      registryAdapter = createDefaultModuleRegistryAdapterForPackages(packages, singletonModules)
+      registryAdapter = createDefaultModuleRegistryAdapterForPackages(packages, singletonModules, ExperiencePackagePicker)
     }
     return registryAdapter
   }
@@ -133,7 +133,6 @@ class ExponentPackage : ReactPackage {
         nativeModules.add(ScreenOrientationModule(reactContext))
         nativeModules.add(RNGestureHandlerModule(reactContext))
         nativeModules.add(RNAWSCognitoModule(reactContext))
-        nativeModules.add(ReanimatedModule(reactContext))
         nativeModules.add(RNCWebViewModule(reactContext))
         nativeModules.add(NetInfoModule(reactContext))
         nativeModules.add(RNSharedElementModule(reactContext))
@@ -214,9 +213,10 @@ class ExponentPackage : ReactPackage {
 
   private fun createDefaultModuleRegistryAdapterForPackages(
     packages: List<Package>,
-    singletonModules: List<SingletonModule>?
+    singletonModules: List<SingletonModule>?,
+    modulesProvider: ModulesProvider? = null
   ): ExpoModuleRegistryAdapter {
-    return ExpoModuleRegistryAdapter(ReactModuleRegistryProvider(packages, singletonModules))
+    return ExpoModuleRegistryAdapter(ReactModuleRegistryProvider(packages, singletonModules), modulesProvider)
   }
 
   companion object {

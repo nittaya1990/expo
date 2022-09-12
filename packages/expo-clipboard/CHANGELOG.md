@@ -10,6 +10,12 @@
 
 ### 💡 Others
 
+## 2.1.0 — 2021-12-03
+
+### 🎉 New features
+
+- Native module on iOS is now written in Swift using [Sweet API](https://blog.expo.dev/a-peek-into-the-upcoming-sweet-expo-module-api-6de6b9aca492). ([#14959](https://github.com/expo/expo/pull/14959) by [@tsapeta](https://github.com/tsapeta))
+
 ## 2.0.1 — 2021-10-01
 
 _This version does not introduce any user-facing changes._

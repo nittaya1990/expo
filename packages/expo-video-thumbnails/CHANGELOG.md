@@ -10,6 +10,16 @@
 
 ### 💡 Others
 
+## 6.2.0 — 2021-12-18
+
+### 🎉 New features
+
+- Thumbnails can now be generated with `content://` paths on Android. ([#15553](https://github.com/expo/expo/pull/15553) by [@lukebrandonfarrell](https://github.com/lukebrandonfarrell))
+
+## 6.1.0 — 2021-12-03
+
+_This version does not introduce any user-facing changes._
+
 ## 6.0.1 — 2021-10-01
 
 _This version does not introduce any user-facing changes._
